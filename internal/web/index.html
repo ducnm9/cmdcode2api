@@ -6,50 +6,55 @@
 <title>cmdcode2api Console</title>
 <style>
   :root {
-    --bg: #0e1116;
-    --panel: #151a22;
-    --panel-2: #1a2029;
-    --border: #262e3a;
-    --text: #d7dee8;
-    --text-dim: #97a3b1;
-    --text-faint: #7c8a9a;
+    --bg: #101216;
+    --panel: #171a1f;
+    --panel-2: #20242b;
+    --border: #303640;
+    --text: #e6e9ee;
+    --text-dim: #a8b1be;
+    --text-faint: #929dab;
     --accent: #4f8cff;
     --accent-dim: #356fd6;
     --green: #34d399;
     --amber: #fbbf24;
     --red: #f87171;
+    --control-height: 36px;
+    color-scheme: dark;
     --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; padding: 0; background: var(--bg); }
   body {
     background: var(--bg);
     color: var(--text);
-    font: 14px/1.55 -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 14px; line-height: 1.55;
     min-height: 100vh;
   }
   a { color: var(--accent); text-decoration: none; }
   a:hover { text-decoration: underline; }
   code, .mono { font-family: var(--mono); font-size: 12.5px; }
 
-  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px 60px; }
+  .wrap { max-width: 1320px; margin: 0 auto; padding: 0 32px 48px; }
 
   header.bar {
     display: flex; align-items: center; gap: 14px;
-    padding: 14px 0; border-bottom: 1px solid var(--border);
-    margin-bottom: 22px;
+    padding: 20px 0; border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
   }
-  header.bar .logo { font-weight: 700; font-size: 15px; letter-spacing: .2px; }
-  header.bar .logo span { color: var(--accent); }
+  header.bar .logo { font-weight: 650; font-size: 16px; }
+  header.bar .logo span { color: var(--text-dim); font-weight: 400; margin-left: 6px; }
   header.bar .ver { color: var(--text-faint); font-family: var(--mono); font-size: 12px; }
   header.bar .spacer { flex: 1; }
 
-  select.lang-select { width: auto; padding: 4px 8px; font-size: 12.5px; }
+  select.lang-select { width: auto; min-width: 112px; font-size: 12.5px; }
   .login-lang { display: flex; justify-content: flex-end; margin-bottom: 10px; }
 
   nav.tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
   nav.tabs::-webkit-scrollbar { display: none; }
   nav.tabs button {
+    min-height: 44px; font-family: inherit;
     appearance: none; background: none; border: none; cursor: pointer;
     color: var(--text-dim); font-size: 14px; padding: 9px 14px; white-space: nowrap;
     border-bottom: 2px solid transparent; margin-bottom: -1px;
@@ -57,28 +62,32 @@
   nav.tabs button:hover { color: var(--text); }
   nav.tabs button.active { color: var(--text); border-bottom-color: var(--accent); }
 
-  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 18px; }
-  .card {
-    background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
-    padding: 14px 16px;
+  .cards {
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+    border: 1px solid var(--border); border-radius: 8px;
+    background: var(--panel); margin-bottom: 24px; overflow: hidden;
   }
-  .card .label { color: var(--text-dim); font-size: 12px; margin-bottom: 6px; }
-  .card .value { font-family: var(--mono); font-size: 22px; font-weight: 600; }
-  .card .sub { color: var(--text-faint); font-size: 12px; margin-top: 4px; }
+  .card { min-width: 0; padding: 20px 24px; border-right: 1px solid var(--border); }
+  .card:nth-child(4n) { border-right: 0; }
+  .card:nth-child(n+5) { border-top: 1px solid var(--border); }
+  .card .label { color: var(--text-dim); font-size: 12px; margin-bottom: 8px; }
+  .card .value { font-variant-numeric: tabular-nums; font-size: 22px; font-weight: 600; overflow-wrap: anywhere; }
+  .card .sub { color: var(--text-faint); font-size: 12px; margin-top: 6px; }
 
-  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; margin-bottom: 18px; }
-  .panel h3 { margin: 0 0 12px; font-size: 13.5px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: .5px; }
-  .panel .hint { color: var(--text-faint); font-size: 12.5px; margin: 8px 0 0; }
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; margin-bottom: 20px; min-width: 0; }
+  .panel h2 { margin: 0 0 16px; font-size: 15px; font-weight: 600; color: var(--text); }
+  .panel .hint { color: var(--text-dim); font-size: 12.5px; margin: 12px 0 0; max-width: 75ch; }
+  .table-scroll { overflow-x: auto; padding: 2px; }
 
   table { width: 100%; border-collapse: collapse; }
   th { text-align: left; color: var(--text-faint); font-size: 12px; font-weight: 500; padding: 8px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
-  td { padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: top; font-size: 13px; }
+  td { padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 13px; }
   tr:last-child td { border-bottom: none; }
   td.num { font-family: var(--mono); font-size: 12.5px; }
   .row-actions { display: flex; gap: 6px; justify-content: flex-end; }
 
   .badge {
-    display: inline-block; padding: 2px 9px; border-radius: 20px;
+    display: inline-block; padding: 2px 7px; border-radius: 4px;
     font-size: 11.5px; font-weight: 600; white-space: nowrap;
   }
   .badge.ok      { background: rgba(52,211,153,.12); color: var(--green); }
@@ -87,7 +96,8 @@
   .badge.off     { background: rgba(151,163,177,.13); color: var(--text-dim); }
 
   .btn {
-    appearance: none; cursor: pointer; border-radius: 8px;
+    appearance: none; cursor: pointer; border-radius: 6px;
+    min-height: var(--control-height); font-family: inherit;
     border: 1px solid var(--border); background: var(--panel-2); color: var(--text);
     font-size: 12.5px; padding: 6px 12px;
     display: inline-flex; align-items: center; justify-content: center;
@@ -99,50 +109,32 @@
   .btn.danger { color: var(--red); }
   .btn.danger:hover { border-color: var(--red); }
   .btn:disabled { opacity: .5; cursor: not-allowed; }
-  .btn.small { padding: 4px 9px; font-size: 12px; }
+  .btn.small { padding: 5px 10px; font-size: 12px; }
+  .row-actions .btn, .acc-actions .btn { min-height: 32px; }
 
   input[type=text], input[type=password], textarea, select {
     width: 100%; background: #0d1117; color: var(--text);
-    border: 1px solid var(--border); border-radius: 8px;
-    padding: 8px 11px; font-size: 13.5px; outline: none;
+    border: 1px solid var(--border); border-radius: 6px;
+    min-height: var(--control-height); padding: 7px 11px; font-size: 13.5px; outline: none;
     font-family: inherit;
   }
   input::placeholder, textarea::placeholder { color: var(--text-dim); opacity: 1; }
   textarea { font-family: var(--mono); font-size: 12.5px; resize: vertical; min-height: 84px; }
-  input:focus, textarea:focus { border-color: var(--accent-dim); }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  input:focus-visible, textarea:focus-visible, select:focus-visible { outline-offset: 2px; }
+  select { appearance: none; padding-right: 32px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='m3 4.5 3 3 3-3' fill='none' stroke='%23a8b1be' stroke-width='1.5'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 11px center; }
+  button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+  input[type=checkbox] { accent-color: var(--accent); width: 16px; height: 16px; flex-shrink: 0; }
+  .check-label { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text-dim); cursor: pointer; }
   label.field { display: block; margin-bottom: 14px; }
   label.field .cap { display: block; color: var(--text-dim); font-size: 12.5px; margin-bottom: 5px; }
   .fields-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   @media (max-width: 640px) { .fields-2 { grid-template-columns: 1fr; } }
 
-  /* motion: subtle, fast, purposeful */
-  @keyframes tabIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-  @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-  @keyframes fadeIn { from { opacity: 0; } }
-  @keyframes popIn { from { opacity: 0; transform: scale(.96) translateY(6px); } }
-  @keyframes logIn { from { opacity: 0; transform: translateX(-4px); } }
-
-  section[id^="tab-"] { animation: tabIn .22s ease-out; }
-  .login-box { animation: rise .35s ease-out both; }
-  .modal-mask { animation: fadeIn .16s ease-out; }
-  .modal-mask .modal { animation: popIn .2s ease-out; }
-  .modal-mask.out { animation: fadeIn .16s ease-out reverse forwards; }
-  .logbox > div { animation: logIn .18s ease-out; }
-
-  .btn, input, textarea, select, .badge, .card, nav.tabs button {
-    transition: background .15s ease, border-color .15s ease, box-shadow .15s ease, color .15s ease, transform .12s ease, opacity .15s ease;
-  }
-  .btn:active { transform: translateY(1px); }
-  .btn.primary:hover { box-shadow: 0 2px 10px rgba(79,140,255,.35); }
-  nav.tabs button { border-bottom: 2px solid transparent; }
-  nav.tabs button:hover { border-bottom-color: var(--border); }
-  nav.tabs button.active:hover { border-bottom-color: var(--accent); }
-  .card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,.25); }
-  tbody tr { transition: background .12s ease; }
-  tbody tr:hover { background: rgba(255,255,255,.02); }
-  .toast { transition: opacity .18s ease, transform .18s ease; }
-  .toast.out { opacity: 0; transform: translateY(6px); }
-
+  .btn, input, textarea, select, nav.tabs button { transition: background-color .15s, border-color .15s, color .15s; }
+  tbody tr:hover { background: var(--panel-2); }
+  .toast.out { opacity: 0; }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
   }
@@ -151,10 +143,12 @@
   .form-row label.field { flex: 1; min-width: 160px; margin-bottom: 0; }
 
   /* login */
-  .login-box { max-width: 380px; margin: 12vh auto 0; }
-  .login-box .title { text-align: center; font-size: 19px; font-weight: 700; margin-bottom: 4px; }
-  .login-box .title span { color: var(--accent); }
-  .login-box .desc { text-align: center; color: var(--text-dim); font-size: 13px; margin-bottom: 24px; }
+  /* Keep login spacing inside the page so margins cannot move the body. */
+  #view-login { padding-top: 12vh; }
+  .login-box { max-width: 400px; margin: 0 auto; padding: 28px; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; }
+  .login-box .title { text-align: left; font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .login-box .title span { display: block; margin-top: 6px; color: var(--text); font-size: 16px; font-weight: 500; }
+  .login-box .desc { text-align: left; color: var(--text-dim); font-size: 13px; margin-bottom: 24px; }
   .login-err { color: var(--red); font-size: 12.5px; min-height: 18px; margin: 10px 0 2px; text-align: center; }
 
   /* toast */
@@ -170,24 +164,27 @@
 
   /* modal */
   .modal-mask {
+    padding: 16px;
     position: fixed; inset: 0; background: rgba(0,0,0,.55);
     display: flex; align-items: center; justify-content: center; z-index: 40;
   }
   .modal {
     background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
-    width: min(520px, calc(100vw - 40px)); padding: 20px 22px; max-height: 84vh; overflow: auto;
+    width: min(520px, 100%); padding: 24px; max-height: 84vh; overflow: auto;
   }
   .modal h3 { margin: 0 0 14px; font-size: 15px; }
   .modal .status-line { margin: 12px 0; font-size: 13px; color: var(--text-dim); }
   .modal .hint { color: var(--text-faint); font-size: 12.5px; line-height: 1.7; margin: 12px 0 0; }
   .modal .modal-err { color: var(--red); font-size: 12.5px; min-height: 18px; margin: 0 0 6px; }
 
-  .panel h3.panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-  .head-actions { display: flex; align-items: center; gap: 8px; font-weight: 400; text-transform: none; letter-spacing: 0; }
-  @media (max-width: 620px) {
-    .panel h3.panel-head { flex-direction: column; align-items: stretch; gap: 10px; }
-    .head-actions { flex-wrap: wrap; justify-content: flex-start; }
-  }
+  .panel-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; min-height: var(--control-height); }
+  .panel .panel-head h2 { margin: 0; }
+  .head-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+  .head-actions input { width: 220px; min-width: 120px; }
+  .settings-layout { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+  .settings-layout > .panel { margin: 0; }
+  .settings-layout .fields-2 { gap: 16px; }
+  .settings-layout .hint { margin-bottom: 16px; }
   .spinner {
     display: inline-block; width: 12px; height: 12px; border-radius: 50%;
     border: 2px solid var(--text-faint); border-top-color: var(--accent);
@@ -201,9 +198,9 @@
     height: 60vh; overflow: auto; white-space: pre-wrap; word-break: break-all;
   }
   .logbox .t { color: var(--text-faint); margin-right: 8px; }
-  .model-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 4px 14px; max-height: 62vh; overflow: auto; }
+  .model-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 4px 16px; max-height: 62vh; overflow: auto; padding: 4px; }
   .model-grid label {
-    display: flex; align-items: center; gap: 8px; padding: 5px 8px;
+    display: flex; align-items: center; gap: 8px; padding: 9px 10px;
     border-radius: 6px; cursor: pointer; font-size: 12.5px;
   }
   .model-grid label:hover { background: var(--panel-2); }
@@ -211,7 +208,7 @@
   .model-grid .mid { font-family: var(--mono); font-size: 12px; word-break: break-all; }
   .model-grid label.hidden-model .mid { color: var(--text-faint); }
   .empty { color: var(--text-faint); text-align: center; padding: 26px 0; font-size: 13px; }
-  .kv { display: grid; grid-template-columns: 180px 1fr; gap: 4px 14px; font-size: 13px; }
+  .kv { display: grid; grid-template-columns: 180px 1fr; gap: 12px 24px; font-size: 13px; }
   .kv .k { color: var(--text-dim); }
   .kv .v { font-family: var(--mono); font-size: 12.5px; word-break: break-all; }
   header.bar .ver { white-space: nowrap; }
@@ -239,14 +236,13 @@
   .quota-err { color: var(--red); font-size: 12px; font-family: var(--mono); margin-top: 8px; word-break: break-all; }
 
   /* accounts: one card per account, side by side */
-  .acc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 14px; }
+  .acc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); gap: 0 24px; }
   @media (max-width: 720px) { .acc-grid { grid-template-columns: 1fr; } }
   .acc-card {
     display: flex; flex-direction: column; gap: 12px;
-    background: var(--panel-2); border: 1px solid var(--border); border-radius: 12px;
-    padding: 14px 16px;
+    border-top: 1px solid var(--border); min-width: 0;
+    padding: 20px 0;
   }
-  .acc-card:hover { border-color: #313d4d; }
   .acc-card.is-off { background: var(--panel); }
   .acc-card.is-off .acc-name { color: var(--text-dim); }
   .acc-card.is-warn { border-color: rgba(251,191,36,.32); }
@@ -270,9 +266,36 @@
   }
   .acc-empty {
     grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; gap: 14px;
-    border: 1px dashed var(--border); border-radius: 12px; padding: 30px 20px;
+    padding: 40px 20px;
   }
   .acc-empty .empty { padding: 0; }
+  @media (max-width: 900px) {
+    .settings-layout { grid-template-columns: 1fr; }
+    .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .card:nth-child(2n) { border-right: 0; }
+    .card:nth-child(n+3) { border-top: 1px solid var(--border); }
+  }
+  @media (max-width: 640px) {
+    .wrap { padding: 0 16px 32px; }
+    header.bar { flex-wrap: wrap; gap: 10px; padding: 16px 0; }
+    header.bar .logo { flex: 1; }
+    header.bar .ver { order: 5; width: 100%; white-space: normal; overflow-wrap: anywhere; }
+    header.bar .spacer { display: none; }
+    nav.tabs { gap: 0; }
+    nav.tabs button { padding: 10px 12px; }
+    .panel { padding: 16px; }
+    .panel-head { align-items: flex-start; }
+    .head-actions { width: 100%; }
+    .head-actions input { flex: 1; width: 100%; }
+    .card { padding: 16px; }
+    .card .value { font-size: 19px; }
+    .kv { grid-template-columns: minmax(100px, 1fr) minmax(0, 1.5fr); gap: 12px; }
+    #view-login { padding-top: 6vh; }
+    .login-box { padding: 24px; }
+    .modal { padding: 20px; max-height: calc(100dvh - 32px); }
+    #toasts { left: 16px; right: 16px; bottom: 16px; }
+    .toast { max-width: 100%; overflow-wrap: anywhere; }
+  }
 </style>
 </head>
 <body>
@@ -287,23 +310,23 @@
       </select>
     </div>
     <div class="title">cmdcode2api <span data-i18n="app.console">Console</span></div>
-    <div class="desc" data-i18n="login.desc">Sign in to the admin API with admin_password from your config file.</div>
+    <div class="desc" data-i18n="login.desc">Enter your server address and admin password.</div>
     <form id="login-form" autocomplete="on">
       <label class="field">
         <span class="cap" data-i18n="login.serverAddress">Server address</span>
         <input type="text" id="login-base" name="server" autocomplete="url" placeholder="http://localhost:11434">
       </label>
       <label class="field">
-        <span class="cap" data-i18n="login.passwordLabel">Admin password (admin_password)</span>
+        <span class="cap" data-i18n="login.passwordLabel">Admin password</span>
         <input type="text" id="login-user" name="username" value="admin" autocomplete="username" aria-hidden="true" tabindex="-1" style="position:absolute;left:-9999px;height:0;width:0;opacity:0">
         <input type="password" id="login-token" name="password" autocomplete="current-password" data-i18n-ph="login.passwordPlaceholder" placeholder="Admin password">
       </label>
       <label class="field" style="display:flex;align-items:center;gap:8px;cursor:pointer">
         <input type="checkbox" id="login-remember" checked style="width:auto;accent-color:var(--accent)">
-        <span class="cap" style="margin:0" data-i18n="login.remember">Remember password (otherwise kept only for this tab)</span>
+        <span class="cap" style="margin:0" data-i18n="login.remember">Remember password on this device</span>
       </label>
-      <div class="login-err" id="login-err"></div>
-      <button type="submit" class="btn primary" id="login-btn" style="width:100%;padding:9px" data-i18n="login.connect">Connect</button>
+      <div class="login-err" id="login-err" role="alert"></div>
+      <button type="submit" class="btn primary" id="login-btn" style="width:100%;padding:9px" data-i18n="login.connect">Sign in</button>
     </form>
   </div>
 </div>
@@ -334,7 +357,7 @@
   <section id="tab-overview">
     <div class="cards" id="ov-cards"></div>
     <div class="panel">
-      <h3 data-i18n="ov.title">Account status</h3>
+      <div class="panel-head"><h2 data-i18n="ov.title">Account status</h2></div>
       <div id="ov-accounts"></div>
     </div>
   </section>
@@ -342,13 +365,13 @@
   <!-- accounts -->
   <section id="tab-accounts" style="display:none">
     <div class="panel">
-      <h3 class="panel-head">
-        <span data-i18n="acc.listTitle">Account list</span>
+      <div class="panel-head">
+        <h2 data-i18n="acc.listTitle">Account list</h2>
         <span class="head-actions">
           <button class="btn small" id="quota-refresh-all" data-i18n="quota.refreshAll">Refresh all quotas</button>
           <button class="btn small primary" id="acc-add-open" data-i18n="acc.addTitle">Add account</button>
         </span>
-      </h3>
+      </div>
       <div id="acc-list"></div>
     </div>
   </section>
@@ -356,46 +379,45 @@
   <!-- models -->
   <section id="tab-models" style="display:none">
     <div class="panel">
-      <h3 style="display:flex;align-items:center;justify-content:space-between">
-        <span data-i18n="models.title">Exposed models</span>
-        <span style="display:flex;gap:8px;align-items:center;font-weight:400;text-transform:none;letter-spacing:0">
-          <input type="text" id="model-search" data-i18n-ph="models.search" placeholder="Search models…" style="width:200px;padding:5px 10px;font-size:12.5px">
+      <div class="panel-head">
+        <h2 data-i18n="models.title">Available models</h2>
+        <div class="head-actions">
+          <input type="text" id="model-search" data-i18n-ph="models.search" placeholder="Search models…" aria-label="Search models" data-i18n-aria="models.search">
           <button class="btn small" id="model-all-btn" data-i18n="models.selectAll">Select all</button>
           <button class="btn small" id="model-none-btn" data-i18n="models.selectNone">Select none</button>
-        </span>
-      </h3>
+        </div>
+      </div>
       <div id="model-list" class="model-grid"><div class="empty" data-i18n="models.loading">Loading…</div></div>
-      <p class="hint" data-i18n-html="models.hint">Checked = exposed (visible in <code>/v1/models</code> and callable); unchecked = hidden and rejected, equivalent to exclude_models. Changes apply immediately and are written back to config.yaml.</p>
+      <p class="hint" data-i18n-html="models.hint">Selected models are listed in <code>/v1/models</code> and can be called. Changes are saved automatically.</p>
     </div>
   </section>
 
   <!-- keys -->
   <section id="tab-keys" style="display:none">
     <div class="panel">
-      <h3 data-i18n="keys.createTitle">Create key</h3>
-      <div class="form-row">
-        <label class="field"><span class="cap" data-i18n="acc.nameOptional">Name (optional)</span><input type="text" id="ck-name" data-i18n-ph="keys.namePlaceholder" placeholder="e.g. my-agent"></label>
-        <button class="btn primary" id="ck-add-btn" data-i18n="keys.create">Create</button>
+      <div class="panel-head">
+        <h2 data-i18n="keys.listTitle">Key list</h2>
+        <div class="head-actions">
+          <button class="btn primary" id="ck-add-open" data-i18n="keys.create">Create key</button>
+        </div>
       </div>
-      <p class="hint" data-i18n="keys.hint">Client keys are generated server-side (they cannot be chosen) and authenticate OpenAI-compatible requests to this gateway via Bearer auth. Usage is tracked per key; the full value is shown only once, at creation.</p>
-    </div>
-    <div class="panel">
-      <h3 data-i18n="keys.listTitle">Key list</h3>
-      <div id="ck-table"></div>
+      <div id="ck-table" class="table-scroll"></div>
     </div>
   </section>
 
   <!-- settings -->
   <section id="tab-settings" style="display:none">
+    <div class="settings-layout">
+    <div>
     <div class="panel">
-      <h3 data-i18n="set.upstream">Upstream</h3>
+      <div class="panel-head"><h2 data-i18n="set.upstream">Upstream</h2></div>
       <label class="field">
         <span class="cap" data-i18n="set.baseUrl">Base URL (applies immediately)</span>
         <input type="text" id="set-baseurl" class="mono">
       </label>
     </div>
     <div class="panel">
-      <h3 data-i18n="set.service">Service</h3>
+      <div class="panel-head"><h2 data-i18n="set.service">Service</h2></div>
       <div class="fields-2">
         <label class="field"><span class="cap" data-i18n="set.host">Host (restart required)</span><input type="text" id="set-host" class="mono"></label>
         <label class="field"><span class="cap" data-i18n="set.port">Port (restart required)</span><input type="text" id="set-port" class="mono"></label>
@@ -406,6 +428,14 @@
           <option value="false" data-i18n="common.disabled">Disabled</option>
         </select>
       </label>
+      <div style="margin-top:16px">
+        <button class="btn primary" id="set-save-btn" data-i18n="set.save">Save settings</button>
+      </div>
+      <div class="restart-note" id="set-restart"></div>
+    </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2 data-i18n="set.security">Admin password</h2></div>
       <form id="pw-form" autocomplete="on">
         <label class="field"><span class="cap" data-i18n="set.currentPassword">Current admin password</span>
           <input type="password" id="set-password-old" name="password" autocomplete="current-password" required>
@@ -414,32 +444,49 @@
           <input type="password" id="set-password" name="new-password" autocomplete="new-password" minlength="8" required>
         </label>
         <button type="submit" class="btn primary" data-i18n="set.changePassword">Change admin password</button>
-        <span class="hint" style="margin-left:10px" data-i18n="set.passwordHint">All signed-in admin sessions (including this browser) are signed out after a change; sign in again with the new password.</span>
+        <p class="hint" data-i18n="set.passwordHint">Changing the password signs out all admin sessions. Sign in again with the new password.</p>
       </form>
-      <div style="margin-top:16px">
-        <button class="btn primary" id="set-save-btn" data-i18n="set.save">Save settings</button>
-      </div>
-      <div class="restart-note" id="set-restart"></div>
+    </div>
     </div>
   </section>
 
   <!-- logs -->
   <section id="tab-logs" style="display:none">
     <div class="panel">
-      <h3 style="display:flex;align-items:center;justify-content:space-between">
-        <span data-i18n="logs.title">Recent logs (last 500 lines kept in memory)</span>
-        <label style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-dim);font-size:12.5px">
+      <div class="panel-head">
+        <h2 data-i18n="logs.title">Recent logs</h2>
+        <label class="check-label">
           <input type="checkbox" id="log-follow" checked style="width:auto"> <span data-i18n="logs.autoScroll">Auto-scroll</span>
         </label>
-      </h3>
+      </div>
       <div class="logbox" id="logbox"><div class="empty" data-i18n="logs.empty">No logs yet</div></div>
     </div>
   </section>
 </div>
 
+<!-- create client key -->
+<div class="modal-mask" id="ck-add-modal" style="display:none">
+  <div class="modal" role="dialog" aria-modal="true">
+    <h3 data-i18n="keys.createTitle">Create key</h3>
+    <form id="ck-add-form">
+      <label class="field">
+        <span class="cap" data-i18n="acc.nameOptional">Name (optional)</span>
+        <input type="text" id="ck-name" data-i18n-ph="keys.namePlaceholder" placeholder="e.g. my-agent">
+      </label>
+      <p class="hint" style="margin:0 0 16px" data-i18n="keys.hint">Use client keys to call the API. Each key tracks usage separately; you can copy it from the list.</p>
+      <div class="modal-err" id="ck-add-err" role="alert"></div>
+      <div class="form-row">
+        <button type="submit" class="btn primary" id="ck-add-btn" data-i18n="keys.create">Create key</button>
+        <span style="flex:1"></span>
+        <button type="button" class="btn" id="ck-add-cancel" data-i18n="common.cancel">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- 添加账号弹窗 -->
 <div class="modal-mask" id="acc-add-modal" style="display:none">
-  <div class="modal">
+  <div class="modal" role="dialog" aria-modal="true">
     <h3 data-i18n="acc.addTitle">Add account</h3>
     <label class="field">
       <span class="cap" data-i18n="acc.nameOptional">Name (optional)</span>
@@ -449,10 +496,10 @@
       <span class="cap">Command Code API Key</span>
       <input type="text" id="acc-key" placeholder="user_…" class="mono">
     </label>
-    <div class="modal-err" id="acc-add-err"></div>
+    <div class="modal-err" id="acc-add-err" role="alert"></div>
     <div class="form-row">
-      <button class="btn primary" id="acc-add-btn" data-i18n="acc.add">Add</button>
-      <button class="btn" id="acc-add-oauth" data-i18n="acc.addOAuth">Add via OAuth</button>
+      <button class="btn primary" id="acc-add-btn" data-i18n="acc.add">Add account</button>
+      <button class="btn" id="acc-add-oauth" data-i18n="acc.addOAuth">Authorize with OAuth</button>
       <span style="flex:1"></span>
       <button class="btn" id="acc-add-cancel" data-i18n="common.cancel">Cancel</button>
     </div>
@@ -461,7 +508,7 @@
 
 <!-- account edit modal -->
 <div class="modal-mask" id="acct-modal" style="display:none">
-  <div class="modal">
+  <div class="modal" role="dialog" aria-modal="true">
     <h3 data-i18n="acc.editTitle">Edit account</h3>
     <label class="field">
       <span class="cap" data-i18n="common.name">Name</span>
@@ -471,7 +518,7 @@
       <span class="cap" data-i18n="acc.editKeyLabel">API key (leave blank to keep current)</span>
       <input type="text" id="acct-edit-key" placeholder="user_…" class="mono">
     </label>
-    <p class="hint" style="margin:0 0 14px" data-i18n="acc.editHint">Changing the key changes the account ID; usage stats migrate to the new ID automatically.</p>
+    <p class="hint" style="margin:0 0 14px" data-i18n="acc.editHint">Usage history is kept when you change the API key.</p>
     <div class="form-row">
       <button class="btn primary" id="acct-edit-save" data-i18n="common.save">Save</button>
       <span class="spacer" style="flex:1"></span>
@@ -482,7 +529,7 @@
 
 <!-- OAuth modal -->
 <div class="modal-mask" id="oauth-modal" style="display:none">
-  <div class="modal">
+  <div class="modal" role="dialog" aria-modal="true">
     <h3 data-i18n="oauth.title">Add account via OAuth</h3>
     <div class="form-row" id="oauth-begin-row" style="margin-bottom:6px">
       <button class="btn primary" id="oauth-begin" data-i18n="oauth.begin">Start authorization</button>
@@ -503,16 +550,12 @@
       <div class="form-row">
         <button class="btn primary" id="oauth-complete-btn" data-i18n="oauth.complete">Submit callback link</button>
       </div>
-    <div class="form-row" id="oauth-begin-row" style="margin-bottom:6px">
-      <button class="btn primary" id="oauth-begin" data-i18n="oauth.begin">Start authorization</button>
-      <span class="spacer" style="flex:1"></span>
-      <button class="btn" id="oauth-cancel" data-i18n="common.close">Close</button>
     </div>
     <div class="status-line" id="oauth-status" style="display:none"></div>
   </div>
 </div>
 
-<div id="toasts"></div>
+<div id="toasts" role="status" aria-live="polite" aria-atomic="false"></div>
 
 <script>
 "use strict";
@@ -569,12 +612,12 @@ const I18N = {
     "quota.exceeded": "{n} quota exceeded",
     "quota.lowBalance": "{n} low balance",
     "quota.lastChecked": "Last checked {when}",
-    "quota.notSynced": "Quota not synced — waiting for a background refresh or click a refresh icon",
-    "quota.noWindow": "No quota windows returned for this account",
+    "quota.notSynced": "Quota not fetched yet. Use Refresh quota to check.",
+    "quota.noWindow": "No quota data available",
     "quota.errorPrefix": "Quota query error:",
     "quota.lastCheckedShort": "checked {when}",
 
-    "quota.resetAfter": "Resets after {d}",
+    "quota.resetAfter": "Resets in {d}",
     "quota.dhm": "{d}d {h}h",
     "quota.hm": "{h}h {m}m",
     "quota.mins": "{m}m",
@@ -597,16 +640,16 @@ const I18N = {
     "quota.unknownReset": "Reset time unknown",
     "quota.noResetPoint": "Not used yet, no reset point",
 
-    "login.desc": "Sign in to the admin API with admin_password from your config file.",
+    "login.desc": "Enter your server address and admin password.",
     "login.serverAddress": "Server address",
-    "login.passwordLabel": "Admin password (admin_password)",
+    "login.passwordLabel": "Admin password",
     "login.passwordPlaceholder": "Admin password",
-    "login.remember": "Remember password (otherwise kept only for this tab)",
-    "login.connect": "Connect",
+    "login.remember": "Remember password on this device",
+    "login.connect": "Sign in",
     "login.fillRequired": "Enter the server address and admin password.",
     "login.connected": "Connected to {base}",
     "login.expired": "Session expired, please sign in again.",
-    "login.rejected": "Sign-in failed: the admin password was rejected.",
+    "login.rejected": "Incorrect admin password. Try again.",
 
     "err.connect": "Cannot reach the server: {msg}",
 
@@ -628,8 +671,8 @@ const I18N = {
     "ov.title": "Account status",
     "ov.totalRequests": "Total requests",
     "ov.running": "up {uptime}",
-    "ov.promptTokens": "Prompt Tokens",
-    "ov.completionTokens": "Completion Tokens",
+    "ov.promptTokens": "Input tokens",
+    "ov.completionTokens": "Output tokens",
     "ov.cacheTokens": "Cache read / write",
     "ov.accounts": "Accounts",
     "ov.accountsValue": "{enabled} enabled / {total}",
@@ -646,12 +689,12 @@ const I18N = {
     "acc.addTitle": "Add account",
     "acc.nameOptional": "Name (optional)",
     "acc.namePlaceholder": "e.g. backup",
-    "acc.add": "Add",
+    "acc.add": "Add account",
     "acc.adding": "Adding…",
-    "acc.addOAuth": "Add via OAuth",
+    "acc.addOAuth": "Authorize with OAuth",
     "acc.hint": "Accounts are used in round-robin order. A rate-limited (429) account goes into cooldown and is skipped until it recovers; 401/403/5xx fail over to the next account automatically. OAuth requires the browser to reach the server's callback ports 127.0.0.1:5959-5968. Quotas auto-refresh every 5 minutes; tap a refresh icon on an account to force a fresh check.",
     "acc.listTitle": "Account list",
-    "acc.empty": "No accounts yet — add an API key or use OAuth",
+    "acc.empty": "No accounts yet",
     "acc.statusOk": "Healthy",
     "acc.statusRateLimited": "Rate-limited",
     "acc.statusAuthError": "Auth failed",
@@ -671,32 +714,34 @@ const I18N = {
     "acc.testFail": "Test failed: {error}",
     "acc.editTitle": "Edit account",
     "acc.editKeyLabel": "API key (leave blank to keep current)",
-    "acc.editHint": "Changing the key changes the account ID; usage stats migrate to the new ID automatically.",
+    "acc.editHint": "Usage history is kept when you change the API key.",
 
-    "models.title": "Exposed models",
+    "models.title": "Available models",
     "models.search": "Search models…",
     "models.selectAll": "Select all",
     "models.selectNone": "Select none",
     "models.loading": "Loading…",
-    "models.hint": "Checked = exposed (visible in <code>/v1/models</code> and callable); unchecked = hidden and rejected, equivalent to exclude_models. Changes apply immediately and are written back to config.yaml.",
+    "models.hint": "Selected models are listed in <code>/v1/models</code> and can be called. Changes are saved automatically.",
     "models.noMatch": "No matching models",
-    "models.emptyCatalog": "Model catalog is empty (upstream returned nothing)",
+    "models.emptyCatalog": "No models returned by the upstream service",
     "models.savedCount": "Saved: {n} models exposed",
-    "models.saved": "Exposed model list saved ({n} available)",
+    "models.saved": "Model availability saved ({n} available)",
 
     "keys.createTitle": "Create key",
     "keys.namePlaceholder": "e.g. my-agent",
-    "keys.create": "Create",
-    "keys.hint": "Client keys are generated server-side (they cannot be chosen) and authenticate OpenAI-compatible requests to this gateway via Bearer auth. Usage is tracked per key; the full value is shown only once, at creation.",
+    "keys.create": "Create key",
+    "keys.creating": "Creating key…",
+    "keys.hint": "Use client keys to call the API. Each key tracks usage separately; you can copy it from the list.",
     "keys.listTitle": "Key list",
-    "keys.empty": "No keys yet — create one for your clients",
-    "keys.created": "Key created: {key}",
+    "keys.empty": "No client keys yet",
+    "keys.created": "Client key created",
     "keys.enabledToast": "Key enabled.",
     "keys.disabledToast": "Key disabled.",
     "keys.confirmDelete": "Delete key \"{name}\"? Clients using it lose access immediately.",
     "keys.deleted": "Key deleted.",
     "keys.copied": "Key copied.",
 
+    "set.security": "Admin password",
     "set.upstream": "Upstream",
     "set.baseUrl": "Base URL (applies immediately)",
     "set.service": "Service",
@@ -706,14 +751,14 @@ const I18N = {
     "set.currentPassword": "Current admin password",
     "set.newPassword": "New admin password (min 8 characters)",
     "set.changePassword": "Change admin password",
-    "set.passwordHint": "All signed-in admin sessions (including this browser) are signed out after a change; sign in again with the new password.",
+    "set.passwordHint": "Changing the password signs out all admin sessions. Sign in again with the new password.",
     "set.save": "Save settings",
     "set.saved": "Settings saved.",
-    "set.restartNote": "⚠ Written to config; these fields take effect after a restart: {fields}",
+    "set.restartNote": "Restart the service to apply: {fields}",
     "set.fillPasswords": "Enter the current and the new password.",
     "set.passwordChanged": "Admin password changed, please sign in again with the new password.",
 
-    "logs.title": "Recent logs (last 500 lines kept in memory)",
+    "logs.title": "Recent logs",
     "logs.autoScroll": "Auto-scroll",
     "logs.empty": "No logs yet",
 
@@ -731,8 +776,8 @@ const I18N = {
     "oauth.authLinkCopied": "Authorization link copied",
     "oauth.copyFailed": "Copy failed — select the link manually",
     "oauth.linkMissing": "The authorization link has not been generated yet",
-    "oauth.success": "✅ Authorization succeeded, account \"{name}\" added",
-    "oauth.failed": "❌ Authorization failed: {error}",
+    "oauth.success": "Account \"{name}\" authorized and added",
+    "oauth.failed": "Authorization failed: {error}",
     "oauth.unknownError": "unknown error",
   },
 
@@ -780,12 +825,12 @@ const I18N = {
     "quota.exceeded": "{n} 额度超限",
     "quota.lowBalance": "{n} 余额不足",
     "quota.lastChecked": "上次检查 {when}",
-    "quota.notSynced": "额度未同步 —— 等待后台刷新或点击刷新图标",
-    "quota.noWindow": "本账号返回的额度窗口为空",
+    "quota.notSynced": "尚未获取额度，可点击“刷新额度”查询。",
+    "quota.noWindow": "暂无额度数据",
     "quota.errorPrefix": "额度查询错误：",
     "quota.lastCheckedShort": "已检查 {when}",
 
-    "quota.resetAfter": "重置于 {d} 后",
+    "quota.resetAfter": "{d}后重置",
     "quota.dhm": "{d}天{h}小时",
     "quota.hm": "{h}小时{m}分钟",
     "quota.mins": "{m}分钟",
@@ -808,16 +853,16 @@ const I18N = {
     "quota.unknownReset": "重置时间未知",
     "quota.noResetPoint": "尚未使用，无重置点",
 
-    "login.desc": "使用配置文件中的 admin_password 登录管理接口",
+    "login.desc": "填写服务器地址和管理密码。",
     "login.serverAddress": "服务器地址",
-    "login.passwordLabel": "管理密码（admin_password）",
+    "login.passwordLabel": "管理密码",
     "login.passwordPlaceholder": "管理密码",
-    "login.remember": "记住密码（取消则仅在当前标签页内保留）",
-    "login.connect": "连 接",
+    "login.remember": "在此设备上记住密码",
+    "login.connect": "登录控制台",
     "login.fillRequired": "请填写服务器地址和管理密码",
     "login.connected": "已连接 {base}",
     "login.expired": "登录已失效，请重新连接",
-    "login.rejected": "登录失败：管理密码被拒绝",
+    "login.rejected": "管理密码不正确，请重试。",
 
     "err.connect": "无法连接服务器：{msg}",
 
@@ -839,9 +884,9 @@ const I18N = {
     "ov.title": "账号状态",
     "ov.totalRequests": "总请求数",
     "ov.running": "运行 {uptime}",
-    "ov.promptTokens": "Prompt Tokens",
-    "ov.completionTokens": "Completion Tokens",
-    "ov.cacheTokens": "Cache 读取 / 写入",
+    "ov.promptTokens": "输入 Tokens",
+    "ov.completionTokens": "输出 Tokens",
+    "ov.cacheTokens": "缓存读取 / 写入",
     "ov.accounts": "账号",
     "ov.accountsValue": "{enabled} 启用 / {total}",
     "ov.rateLimitedCount": "{n} 个限流中",
@@ -857,12 +902,12 @@ const I18N = {
     "acc.addTitle": "添加账号",
     "acc.nameOptional": "名称（可选）",
     "acc.namePlaceholder": "例如 backup",
-    "acc.add": "添加",
+    "acc.add": "添加账号",
     "acc.adding": "添加中…",
-    "acc.addOAuth": "通过 OAuth 添加",
+    "acc.addOAuth": "使用 OAuth 授权",
     "acc.hint": "多账号按轮询方式轮流使用；某个账号 429 限流时自动冷却并在期间跳过，401/403/5xx 自动切换到下一个账号。OAuth 需要浏览器能访问服务器的 127.0.0.1:5959-5968 回调端口。额度每 5 分钟自动刷新，也可在账号列表中手动刷新。",
     "acc.listTitle": "账号列表",
-    "acc.empty": "还没有账号 —— 添加一个 API Key 或使用 OAuth",
+    "acc.empty": "暂无账号",
     "acc.statusOk": "正常",
     "acc.statusRateLimited": "限流中",
     "acc.statusAuthError": "鉴权失败",
@@ -882,32 +927,34 @@ const I18N = {
     "acc.testFail": "测试失败：{error}",
     "acc.editTitle": "编辑账号",
     "acc.editKeyLabel": "API Key（留空表示不修改）",
-    "acc.editHint": "更换 Key 后账号 ID 会变化，用量统计会自动迁移到新 ID。",
+    "acc.editHint": "更换 API Key 后保留用量统计。",
 
-    "models.title": "对外暴露的模型",
+    "models.title": "可用模型",
     "models.search": "搜索模型…",
     "models.selectAll": "全选",
     "models.selectNone": "全不选",
     "models.loading": "加载中…",
-    "models.hint": "勾选 = 对外提供（<code>/v1/models</code> 可见、可调用）；取消勾选 = 隐藏并拒绝调用，等同于 exclude_models。更改即时生效并写回 config.yaml。",
+    "models.hint": "勾选的模型可通过 <code>/v1/models</code> 查询和调用。修改后自动保存。",
     "models.noMatch": "没有匹配的模型",
-    "models.emptyCatalog": "模型目录为空（上游未返回）",
+    "models.emptyCatalog": "上游服务尚未返回模型",
     "models.savedCount": "已保存：{n} 个模型对外提供",
-    "models.saved": "模型暴露列表已保存（{n} 个可用）",
+    "models.saved": "模型设置已保存（{n} 个可用）",
 
     "keys.createTitle": "新建密钥",
     "keys.namePlaceholder": "例如 my-agent",
-    "keys.create": "新建",
-    "keys.hint": "客户端密钥由服务端自动生成（无法手动指定），用于调用本网关的 OpenAI 兼容接口（Bearer 认证），每个密钥独立统计用量；完整值仅在创建时显示一次。",
+    "keys.create": "新建密钥",
+    "keys.creating": "正在新建密钥…",
+    "keys.hint": "客户端使用密钥调用 API，每个密钥独立统计用量。可在下方列表中查看或复制。",
     "keys.listTitle": "密钥列表",
-    "keys.empty": "还没有密钥 —— 新建一把给客户端使用",
-    "keys.created": "密钥已创建：{key}",
+    "keys.empty": "暂无客户端密钥",
+    "keys.created": "客户端密钥已创建",
     "keys.enabledToast": "密钥已启用",
     "keys.disabledToast": "密钥已禁用",
     "keys.confirmDelete": "确定删除密钥「{name}」？使用它的客户端将立即失去访问权限。",
     "keys.deleted": "密钥已删除",
     "keys.copied": "密钥已复制",
 
+    "set.security": "管理密码",
     "set.upstream": "上游",
     "set.baseUrl": "Base URL（即时生效）",
     "set.service": "服务",
@@ -917,14 +964,14 @@ const I18N = {
     "set.currentPassword": "当前管理密码",
     "set.newPassword": "新管理密码（至少 8 位）",
     "set.changePassword": "修改管理密码",
-    "set.passwordHint": "修改成功后会踢出所有已登录的管理会话（包括当前浏览器），需用新密码重新登录。",
+    "set.passwordHint": "修改后，所有管理会话将退出，请使用新密码重新登录。",
     "set.save": "保存设置",
     "set.saved": "设置已保存",
-    "set.restartNote": "⚠ 已写入配置，以下字段需要重启服务后生效：{fields}",
+    "set.restartNote": "重启服务后生效：{fields}",
     "set.fillPasswords": "请填写当前密码和新密码",
     "set.passwordChanged": "管理密码已修改，请用新密码重新登录",
 
-    "logs.title": "最近日志（内存保留 500 行）",
+    "logs.title": "最近日志",
     "logs.autoScroll": "自动滚动",
     "logs.empty": "暂无日志",
 
@@ -942,8 +989,8 @@ const I18N = {
     "oauth.authLinkCopied": "授权链接已复制",
     "oauth.copyFailed": "复制失败，请手动选择链接",
     "oauth.linkMissing": "授权链接尚未生成",
-    "oauth.success": "✅ 授权成功，账号「{name}」已添加",
-    "oauth.failed": "❌ 授权失败：{error}",
+    "oauth.success": "授权成功，已添加账号「{name}」",
+    "oauth.failed": "授权失败：{error}",
     "oauth.unknownError": "未知错误",
   },
 };
@@ -984,6 +1031,7 @@ function applyI18n() {
   // Only dictionary entries written as trusted static HTML are used here.
   for (const el of document.querySelectorAll("[data-i18n-html]")) el.innerHTML = t(el.dataset.i18nHtml);
   for (const el of document.querySelectorAll("[data-i18n-ph]")) el.placeholder = t(el.dataset.i18nPh);
+  for (const el of document.querySelectorAll("[data-i18n-aria]")) el.setAttribute("aria-label", t(el.dataset.i18nAria));
   for (const el of document.querySelectorAll("[data-i18n-title]")) el.title = t(el.dataset.i18nTitle);
 }
 
@@ -1391,6 +1439,9 @@ function statusBadge(a) {
 
 function renderAccounts(accounts) {
   const box = $("#acc-list");
+  const hasAccounts = Boolean(accounts && accounts.length);
+  $("#quota-refresh-all").hidden = !hasAccounts;
+  $("#acc-add-open").hidden = !hasAccounts;
   if (!accounts || !accounts.length) {
     box.innerHTML = `<div class="acc-empty">
       <div class="empty">${esc(t("acc.empty"))}</div>
@@ -1437,7 +1488,7 @@ function openAddAccount() {
   $("#acc-key").value = "";
   $("#acc-add-err").textContent = "";
   $("#acc-add-modal").style.display = "";
-  $("#acc-name").focus();
+  focusDialog($("#acc-add-modal"));
 }
 
 async function addAccount() {
@@ -1484,7 +1535,7 @@ function openAccountEdit(id, name) {
   $("#acct-edit-name").value = name;
   $("#acct-edit-key").value = "";
   $("#acct-modal").style.display = "";
-  $("#acct-edit-name").focus();
+  focusDialog($("#acct-modal"));
 }
 
 async function saveAccountEdit() {
@@ -1616,14 +1667,31 @@ async function loadKeys() {
   } catch (e) { /* 401 already handled */ }
 }
 
+function openAddKey() {
+  $("#ck-add-form").reset();
+  $("#ck-add-err").textContent = "";
+  $("#ck-add-modal").style.display = "";
+  focusDialog($("#ck-add-modal"));
+}
+
 async function addKey() {
+  const btn = $("#ck-add-btn");
+  if (btn.disabled) return;
   const name = $("#ck-name").value.trim();
+  $("#ck-add-err").textContent = "";
+  btn.disabled = true;
+  btn.textContent = t("keys.creating");
   try {
-    const created = await api("/admin/api/keys", { method: "POST", body: { name } });
-    $("#ck-name").value = "";
-    toast(t("keys.created", { key: created.key }));
+    await api("/admin/api/keys", { method: "POST", body: { name } });
+    hideModal("#ck-add-modal");
+    toast(t("keys.created"));
     loadKeys();
-  } catch (e) { toast(e.message, true); }
+  } catch (e) {
+    $("#ck-add-err").textContent = e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = t("keys.create");
+  }
 }
 
 async function toggleKey(id, enabled) {
@@ -1748,6 +1816,7 @@ function openOAuthModal() {
   $("#oauth-complete-btn").disabled = false;
   $("#oauth-complete-btn").textContent = t("oauth.complete");
   $("#oauth-modal").style.display = "";
+  focusDialog($("#oauth-modal"));
 }
 
 function startOAuth() {
@@ -1817,10 +1886,29 @@ function stopOAuthPolling() {
   if (state.oauthTimer) { clearInterval(state.oauthTimer); state.oauthTimer = null; }
 }
 
+const modalTriggers = new WeakMap();
+function focusDialog(dialog) {
+  modalTriggers.set(dialog, document.activeElement);
+  const title = dialog.querySelector("h3");
+  title.id = dialog.id + "-title";
+  dialog.querySelector(".modal").setAttribute("aria-labelledby", title.id);
+  dialog.querySelector("input, button, a[href]")?.focus();
+}
+
 function hideModal(sel) {
   const m = $(sel);
-  m.classList.add("out");
-  setTimeout(() => { m.classList.remove("out"); m.style.display = "none"; }, 160);
+  const trigger = modalTriggers.get(m);
+  m.style.display = "none";
+  if (trigger?.isConnected && trigger.getClientRects().length) trigger.focus();
+  else {
+    const fallback = $("#acc-list .acc-empty button") || $("#acc-add-open");
+    if (fallback?.getClientRects().length) fallback.focus();
+  }
+}
+
+function cancelOAuth() {
+  api("/admin/api/oauth/cancel", { method: "POST" }).catch(() => {});
+  closeOAuth();
 }
 
 function closeOAuth() {
@@ -1849,22 +1937,33 @@ $("#acc-add-oauth").addEventListener("click", openOAuthModal);
 $("#acc-add-modal").addEventListener("click", e => { if (e.target === $("#acc-add-modal")) hideModal("#acc-add-modal"); });
 $("#quota-refresh-all").addEventListener("click", refreshAllQuotas);
 $("#oauth-begin").addEventListener("click", startOAuth);
-$("#oauth-cancel").addEventListener("click", () => hideModal("#oauth-modal"));
-$("#oauth-cancel2").addEventListener("click", () => {
-  api("/admin/api/oauth/cancel", { method: "POST" }).catch(() => {});
-  closeOAuth();
-});
-$("#ck-add-btn").addEventListener("click", addKey);
-$("#ck-name").addEventListener("keydown", e => { if (e.key === "Enter") addKey(); });
+$("#oauth-cancel2").addEventListener("click", cancelOAuth);
+$("#ck-add-open").addEventListener("click", openAddKey);
+$("#ck-add-form").addEventListener("submit", e => { e.preventDefault(); addKey(); });
+$("#ck-add-cancel").addEventListener("click", () => hideModal("#ck-add-modal"));
+$("#ck-add-modal").addEventListener("click", e => { if (e.target === $("#ck-add-modal")) hideModal("#ck-add-modal"); });
 
 $("#acct-edit-save").addEventListener("click", saveAccountEdit);
 $("#acct-edit-cancel").addEventListener("click", () => hideModal("#acct-modal"));
 $("#acct-modal").addEventListener("click", e => { if (e.target === $("#acct-modal")) hideModal("#acct-modal"); });
 
 document.addEventListener("keydown", e => {
+  if (e.key === "Tab") {
+    const dialog = [...document.querySelectorAll(".modal-mask")].find(m => m.style.display !== "none" && !m.classList.contains("out"));
+    if (dialog) {
+      const controls = [...dialog.querySelectorAll("input, button, a[href], select, textarea")].filter(el => !el.disabled && el.getClientRects().length);
+      const first = controls[0], last = controls[controls.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  }
   if (e.key !== "Escape") return;
-  for (const sel of ["#acc-add-modal", "#acct-modal", "#oauth-modal"]) {
-    if ($(sel).style.display !== "none") { hideModal(sel); return; }
+  for (const sel of ["#ck-add-modal", "#acc-add-modal", "#acct-modal", "#oauth-modal"]) {
+    if ($(sel).style.display !== "none") {
+      if (sel === "#oauth-modal") cancelOAuth();
+      else hideModal(sel);
+      return;
+    }
   }
 });
 
@@ -1874,11 +1973,8 @@ $("#model-none-btn").addEventListener("click", () => setAllModels(false));
 $("#oauth-copy").addEventListener("click", copyOAuthLink);
 $("#oauth-complete-btn").addEventListener("click", submitOAuthCallback);
 $("#oauth-callback").addEventListener("keydown", e => { if (e.key === "Enter") submitOAuthCallback(); });
-$("#oauth-cancel").addEventListener("click", () => {
-  api("/admin/api/oauth/cancel", { method: "POST" }).catch(() => {});
-  closeOAuth();
-});
-$("#oauth-modal").addEventListener("click", e => { if (e.target === $("#oauth-modal")) hideModal("#oauth-modal"); });
+$("#oauth-cancel").addEventListener("click", cancelOAuth);
+$("#oauth-modal").addEventListener("click", e => { if (e.target === $("#oauth-modal")) cancelOAuth(); });
 
 $("#set-save-btn").addEventListener("click", saveSettings);
 
