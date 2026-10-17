@@ -117,8 +117,10 @@ func RefreshModels(baseURL string, pool *AccountPool) (int, error) {
 
 // RunModelRefresh re-fetches the catalog on a fixed interval until ctx is
 // cancelled. The initial fetch happens at startup elsewhere, so this only runs
-// subsequent refreshes.
-func RunModelRefresh(ctx context.Context, baseURL string, pool *AccountPool) {
+// subsequent refreshes. The base URL is read from cfg on every tick (not
+// captured once) so an admin editing base_url live is honored by the loop,
+// matching the on-demand refresh path.
+func RunModelRefresh(ctx context.Context, cfg *Config, pool *AccountPool) {
 	ticker := time.NewTicker(modelRefreshInterval)
 	defer ticker.Stop()
 	for {
@@ -126,7 +128,7 @@ func RunModelRefresh(ctx context.Context, baseURL string, pool *AccountPool) {
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
-			if _, err := RefreshModels(baseURL, pool); err != nil {
+			if _, err := RefreshModels(cfg.UpstreamBaseURL(), pool); err != nil {
 				log.Printf("[WARN] periodic model refresh: %v (keeping current catalog)", err)
 			}
 		}

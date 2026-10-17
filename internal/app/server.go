@@ -225,8 +225,10 @@ func runServer(cc *CCClient, cfg *Config, usage *UsageTracker, ring *logRing) er
 
 	// Model catalog: the initial fetch happens at startup (app.go); from here
 	// re-fetch periodically so newly released upstream models appear without a
-	// restart. Shares the shutdown-derived context so it stops cleanly.
-	go RunModelRefresh(quotaCtx, cc.BaseURLValue(), pool)
+	// restart. Shares the shutdown-derived context so it stops cleanly. The
+	// base URL is read live from cfg each tick so a runtime base_url change is
+	// picked up without a restart.
+	go RunModelRefresh(quotaCtx, cfg, pool)
 
 	idleConnsClosed := make(chan struct{})
 	go func() {

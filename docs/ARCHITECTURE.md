@@ -74,7 +74,9 @@ Admin có lớp auth riêng (`adminAuth`) dùng `admin_password`, rate-limit the
 Server timeouts: Read 30s, **Write 600s** (cho streaming), Idle 120s. Graceful
 shutdown qua SIGINT/SIGTERM (timeout 15s). Vòng lặp quota chạy nền, dừng theo
 context khi shutdown. Catalog model cũng được làm mới nền mỗi 30 phút
-(`RunModelRefresh`), chia sẻ cùng context shutdown.
+(`RunModelRefresh`), chia sẻ cùng context shutdown; mỗi lần làm mới đọc
+`base_url` trực tiếp từ `Config` nên thay đổi `base_url` lúc chạy được áp dụng
+mà không cần khởi động lại.
 
 ### Bảng route
 
