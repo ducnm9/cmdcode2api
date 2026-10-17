@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [master]
+    branches: [master, develop]
     tags: ["v*"]
   pull_request:
 
@@ -52,8 +52,8 @@ jobs:
   docker:
     name: Publish to GHCR
     runs-on: ubuntu-latest
-    # PRs build nothing here; images are published on master pushes and v* tags.
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v'))
+    # PRs build nothing here; images are published on master/develop pushes and v* tags.
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/tags/v'))
     permissions:
       contents: read
       packages: write
@@ -80,6 +80,7 @@ jobs:
           images: ${{ steps.image.outputs.name }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
+            type=ref,event=branch
             type=semver,pattern={{version}}
             type=sha
 
