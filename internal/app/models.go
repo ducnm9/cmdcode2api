@@ -10,7 +10,7 @@ import (
 
 var modelCatalog []ModelInfo
 
-// FetchProviderModels 从 CC API 拉取模型列表，填充 modelCatalog。
+// FetchProviderModels pulls the model list from the CC API and populates modelCatalog.
 func FetchProviderModels(baseURL, apiKey string) {
 	url := baseURL + "/provider/v1/models"
 

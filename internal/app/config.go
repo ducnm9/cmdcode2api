@@ -111,8 +111,9 @@ func defaultConfig() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	// 生成的客户端密钥只写入 api_keys 列表；旧字段 api_key 仅用于兼容
-	// 已有的手工配置，不再出现在新生成的文件里。
+	// The generated client key is written only to the api_keys list; the legacy
+	// api_key field is kept only for compatibility with existing hand-written
+	// configs and no longer appears in newly generated files.
 	c := &Config{
 		AdminPassword: adminPassword,
 		Host:          "localhost",
@@ -133,7 +134,7 @@ func genAPIKey() (string, error) {
 }
 
 func genAdminPassword() (string, error) {
-	// 12 位纯随机字符即可，不加可读前缀
+	// 12 purely random characters are enough; no readable prefix.
 	return randomPassword(12)
 }
 

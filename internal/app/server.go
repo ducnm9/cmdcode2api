@@ -45,8 +45,8 @@ func authMiddleware(cfg *Config, keys *ClientKeyPool) func(http.Handler) http.Ha
 	}
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// /health、/usage、/webui 页面和 CORS preflight 不需要 Bearer 认证；
-			// /admin/* 有独立的管理密码认证。
+			// /health, /usage, the /webui pages and CORS preflight need no Bearer auth;
+			// /admin/* has its own admin-password auth.
 			if r.Method == http.MethodOptions || isPublicPath(r.URL.Path) {
 				next.ServeHTTP(w, r)
 				return
@@ -187,13 +187,14 @@ func runServer(cc *CCClient, cfg *Config, usage *UsageTracker, ring *logRing) er
 		json.NewEncoder(w).Encode(usage.Snapshot())
 	})
 
-	// WebUI：管理 API 与内嵌的单文件界面，挂在 /webui 下，根路径留给 API。
+	// WebUI: the admin API and the embedded single-file interface are mounted under /webui, leaving the root path for the API.
 	adminMux := http.NewServeMux()
 	registerAdminRoutes(adminMux, cc, pool, keys, cfg, usage, ring, quotas)
 	if cfg.WebUIEnabled() {
 		mux.Handle("/admin/", adminAuth(cfg, nil)(adminMux))
-		// Command Code 页面回传凭据的公开端点（靠 state 校验，非管理密码）。
-		// 注册为更具体的 pattern，绕过 adminAuth。
+		// Public endpoint where the Command Code page posts the credential back
+		// (guarded by the state check, not the admin password). Registered as a
+		// more specific pattern to bypass adminAuth.
 		mux.HandleFunc("POST /admin/api/oauth/callback", handleWebOAuthCallback())
 		mux.HandleFunc("/webui", web.Handler())
 		mux.HandleFunc("/webui/", web.Handler())
@@ -210,14 +211,14 @@ func runServer(cc *CCClient, cfg *Config, usage *UsageTracker, ring *logRing) er
 		Addr:         addr,
 		Handler:      handler,
 		ReadTimeout:  30 * time.Second,
-		WriteTimeout: 600 * time.Second, // 流式响应需要长超时
+		WriteTimeout: 600 * time.Second, // streaming responses need a long timeout
 		IdleTimeout:  120 * time.Second,
 	}
 
 	shutdownSignal, stopSignals := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stopSignals()
 
-	// 额度采集：启动后立即刷新一次，之后每 5 分钟一次；服务退出时停止。
+	// Quota collection: refresh once right after startup, then every 5 minutes; stop when the service exits.
 	quotaCtx, stopQuotas := context.WithCancel(shutdownSignal)
 	defer stopQuotas()
 	go quotas.Run(quotaCtx)

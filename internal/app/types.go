@@ -8,7 +8,7 @@ import (
 )
 
 // ============================================================================
-// OpenAI 兼容格式（客户端 ↔ 我们）
+// OpenAI-compatible format (client <-> us)
 // ============================================================================
 
 type ChatRequest struct {
@@ -269,7 +269,7 @@ type CallFunc struct {
 	Arguments string `json:"arguments"`
 }
 
-// 非流式响应
+// non-streaming response
 type ChatResponse struct {
 	ID      string   `json:"id"`
 	Object  string   `json:"object"`
@@ -299,7 +299,7 @@ type PromptTokensDetails struct {
 	CachedTokens int `json:"cached_tokens"`
 }
 
-// 流式响应块
+// streaming response chunk
 type ChatStreamChunk struct {
 	ID      string         `json:"id"`
 	Object  string         `json:"object"`
@@ -333,7 +333,7 @@ type StreamDelta struct {
 	ToolCalls        []StreamToolCall `json:"tool_calls,omitempty"`
 }
 
-// MODELS 列表
+// MODELS list
 type ModelInfo struct {
 	ID            string `json:"id"`
 	Object        string `json:"object"`
@@ -347,21 +347,21 @@ type ModelList struct {
 	Data   []ModelInfo `json:"data"`
 }
 
-// CCProviderModel CC API /provider/v1/models 返回的单个模型
+// CCProviderModel is a single model returned by the CC API /provider/v1/models
 type CCProviderModel struct {
 	ID            string `json:"id"`
 	Name          string `json:"name"`
 	ContextLength int    `json:"context_length"`
 }
 
-// CCProviderModelList CC API /provider/v1/models 响应
+// CCProviderModelList is the CC API /provider/v1/models response
 type CCProviderModelList struct {
 	Object string            `json:"object"`
 	Data   []CCProviderModel `json:"data"`
 }
 
 // ============================================================================
-// Command Code 内部格式（我们 ↔ CC 服务器）
+// Command Code internal format (us <-> CC server)
 // ============================================================================
 
 type CCRequest struct {
@@ -421,7 +421,7 @@ type CCTool struct {
 	InputSchema map[string]any `json:"input_schema,omitempty"`
 }
 
-// CC SSE 事件
+// CC SSE event
 type CCStreamEvent struct {
 	Type            string   `json:"type"`
 	ID              string   `json:"id,omitempty"`

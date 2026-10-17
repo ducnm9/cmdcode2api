@@ -414,12 +414,12 @@ func TestLocalizeQuotaSnapshot(t *testing.T) {
 		t.Fatalf("EN should return the same snapshot, got %+v", got)
 	}
 
-	// Chinese translates both fields and leaves the stored snapshot intact.
-	got := localizeQuotaSnapshot(i18n.ZHCN, snap)
-	if got.LastError != "API Key 被拒绝：HTTP 401" {
+	// Vietnamese translates both fields and leaves the stored snapshot intact.
+	got := localizeQuotaSnapshot(i18n.VI, snap)
+	if got.LastError != "API key bị từ chối: HTTP 401" {
 		t.Fatalf("LastError = %q", got.LastError)
 	}
-	wantFailures := []string{"whoami: context deadline exceeded", "额度接口返回空数据"}
+	wantFailures := []string{"whoami: context deadline exceeded", "Các endpoint hạn mức không trả về dữ liệu"}
 	if len(got.Failures) != len(wantFailures) || got.Failures[0] != wantFailures[0] || got.Failures[1] != wantFailures[1] {
 		t.Fatalf("Failures = %v, want %v", got.Failures, wantFailures)
 	}
@@ -429,12 +429,12 @@ func TestLocalizeQuotaSnapshot(t *testing.T) {
 
 	// A snapshot without error texts is passed through untouched.
 	clean := &QuotaSnapshot{MonthlyCredits: floatPtr(1)}
-	if got := localizeQuotaSnapshot(i18n.ZHCN, clean); got != clean {
+	if got := localizeQuotaSnapshot(i18n.VI, clean); got != clean {
 		t.Fatalf("clean snapshot should be returned as-is, got %+v", got)
 	}
 
 	// Nil is nil-safe (mirrors usage.Quota returning nil for unknown accounts).
-	if got := localizeQuotaSnapshot(i18n.ZHCN, nil); got != nil {
+	if got := localizeQuotaSnapshot(i18n.VI, nil); got != nil {
 		t.Fatalf("nil snapshot = %+v, want nil", got)
 	}
 }

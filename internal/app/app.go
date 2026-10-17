@@ -16,9 +16,9 @@ const Version = "v0.2.0"
 var configFile = "config.yaml"
 
 func Run() {
-	oauthMode := flag.Bool("oauth", false, "通过浏览器 OAuth 获取 Command Code API Key")
-	oauthCallback := flag.String("oauth-callback", "", "OAuth callback URL，例如 http://server.example.com:5959/callback")
-	host := flag.String("host", "", "HTTP listen host，例如 localhost 或 0.0.0.0")
+	oauthMode := flag.Bool("oauth", false, "obtain a Command Code API key via browser OAuth")
+	oauthCallback := flag.String("oauth-callback", "", "OAuth callback URL, e.g. http://server.example.com:5959/callback")
+	host := flag.String("host", "", "HTTP listen host, e.g. localhost or 0.0.0.0")
 	port := flag.Int("port", 0, "HTTP listen port")
 	debug := flag.Bool("debug", false, "print request body and all CC SSE events to stderr")
 	version := flag.Bool("version", false, "print version and exit")
@@ -31,14 +31,14 @@ func Run() {
 
 	cfgPath := findConfig()
 
-	// --oauth 模式：浏览器登录获取 API Key
+	// --oauth mode: log in via the browser to obtain an API key
 	if *oauthMode {
 		cfg, err := loadConfig(cfgPath)
 		if err != nil {
 			log.Fatalf("load config failed: %v", err)
 		}
 		if cfg == nil {
-			// 没有配置，先生成一份
+			// no config yet, generate one first
 			cfg2, err := defaultConfig()
 			if err != nil {
 				log.Fatalf("create config failed: %v", err)
@@ -54,7 +54,7 @@ func Run() {
 			log.Fatalf("OAuth failed: %v", err)
 		}
 
-		// OAuth 追加账号而不是覆盖：重复执行即可接入多个账号。
+		// OAuth appends an account instead of overwriting: run it repeatedly to connect multiple accounts.
 		pool := NewAccountPool(cfg.CommandCode.Accounts)
 		if acct := pool.Get(accountID(cb.APIKey)); acct != nil {
 			fmt.Printf("\nℹ️  API key already configured as account %q in %s\n", acct.Name, cfgPath)
@@ -77,13 +77,13 @@ func Run() {
 		return
 	}
 
-	// 正常模式
+	// normal mode
 	cfg, err := loadConfig(cfgPath)
 	if err != nil {
 		log.Fatalf("load config failed: %v", err)
 	}
 
-	// 首次运行 — 生成配置
+	// first run — generate config
 	if cfg == nil {
 		cfg2, err := defaultConfig()
 		if err != nil {
@@ -110,13 +110,13 @@ Use the local client key above as the Bearer token for your OpenAI client.
 		os.Exit(0)
 	}
 
-	// 没有上游账号也照常启动：WebUI/客户端密钥/设置均可用，
-	// chat 请求会返回 503 no_accounts，直到在 WebUI 添加账号。
+	// The server still starts with no upstream accounts: WebUI/client keys/settings all work,
+	// and chat requests return 503 no_accounts until an account is added via the WebUI.
 	if len(cfg.CommandCode.Accounts) == 0 {
 		log.Printf("[WARN] no Command Code accounts configured; chat requests will return 503 until an account is added via the WebUI (/webui) or --oauth")
 	}
 
-	// WebUI 管理密码为空时生成一个，只打印一次
+	// Generate a WebUI admin password when empty, printed only once.
 	adminPasswordGenerated := false
 	if cfg.adminPassword() == "" {
 		password, err := genAdminPassword()
@@ -150,7 +150,7 @@ Use the local client key above as the Bearer token for your OpenAI client.
 		debugMode = true
 	}
 
-	// 日志同时写入环形缓冲，供 WebUI 查看
+	// Mirror logs into a ring buffer so the WebUI can display them.
 	ring := newLogRing()
 	log.SetOutput(io.MultiWriter(os.Stderr, ring))
 

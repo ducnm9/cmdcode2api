@@ -58,7 +58,7 @@ type OAuthFlow struct {
 	err    error
 }
 
-// generateState 生成随机 state token 防 CSRF
+// generateState generates a random state token to prevent CSRF
 func generateState() (string, error) {
 	state, err := randomHex(32)
 	if err != nil {
@@ -87,7 +87,7 @@ func StartOAuthFlow(opts OAuthOptions) (*OAuthFlow, error) {
 
 	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", listenHost, listenPort))
 	if err != nil {
-		// 尝试下一个端口
+		// try the next port
 		for port := oauthPortStart + 1; port < oauthPortStart+oauthPortRange; port++ {
 			listener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", listenHost, port))
 			if err == nil {
@@ -137,7 +137,7 @@ func StartOAuthFlow(opts OAuthOptions) (*OAuthFlow, error) {
 			return
 		}
 
-		// 错误回调
+		// error callback
 		if errMsg, _ := r.URL.Query()["error"]; len(errMsg) > 0 {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(200)
@@ -165,7 +165,7 @@ func StartOAuthFlow(opts OAuthOptions) (*OAuthFlow, error) {
 
 	server := &http.Server{Handler: mux}
 	go func() {
-		_ = server.Serve(listener) // server 被关闭是正常的
+		_ = server.Serve(listener) // the server being closed is expected
 	}()
 
 	flow, err := newOAuthFlow(opts, server)

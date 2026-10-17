@@ -487,25 +487,25 @@ func isSSEFieldLine(line string) bool {
 	return false
 }
 
-// ====================== 格式转换 ======================
+// ====================== format conversion ======================
 
-// resolveModelName 将客户端传来的 model ID 映射为 CC API 期望的格式。
-// 优先使用动态 modelCatalog（来自 /provider/v1/models），
-// 回退到根据模型名推断 provider 前缀。
+// resolveModelName maps the model ID sent by the client to the format the CC
+// API expects. It prefers the dynamic modelCatalog (from /provider/v1/models),
+// falling back to inferring the provider prefix from the model name.
 func resolveModelName(model string) string {
-	// 已有 provider 前缀（含 /），直接使用
+	// already has a provider prefix (contains /), use as-is
 	if strings.Contains(model, "/") {
 		return model
 	}
 
-	// 在动态 catalog 中查找匹配的 ID（catalog 中的 ID 已含正确前缀）
+	// Look up a matching ID in the dynamic catalog (catalog IDs already carry the correct prefix).
 	for _, m := range modelCatalog {
 		if m.ID == model || strings.HasSuffix(m.ID, "/"+model) {
 			return m.ID
 		}
 	}
 
-	// catalog 中未找到，根据模型名前缀推断 provider
+	// Not found in the catalog; infer the provider from the model name prefix.
 	switch {
 	case strings.HasPrefix(model, "gemini-"):
 		return "google/" + model
@@ -549,7 +549,7 @@ func openAIToCC(req *ChatRequest) (CCRequest, error) {
 			Tools:     tools,
 			System:    system,
 			MaxTokens: req.OutputTokenBudget(),
-			Stream:    true, // CC API 只支持流式
+			Stream:    true, // the CC API only supports streaming
 		},
 	}
 	// command-code's main agent, print mode, and subagents all request 64k
@@ -581,7 +581,7 @@ func messagesToCC(msgs []Message) ([]CCMsg, error) {
 	toolNames := make(map[string]string)
 	for _, m := range msgs {
 		if m.Role == "system" || m.Role == "developer" {
-			continue // 已提取到 top-level system
+			continue // already extracted into the top-level system
 		}
 		if m.Role == "assistant" {
 			for _, tc := range m.ToolCalls {

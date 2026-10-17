@@ -25,56 +25,56 @@ const (
 	// EN is the default and fallback language. It needs no catalog entries,
 	// because every message is already written in English.
 	EN Lang = "en"
-	// ZHCN is Simplified Chinese.
-	ZHCN Lang = "zh-CN"
+	// VI is Vietnamese.
+	VI Lang = "vi"
 )
 
 // translations holds "English source -> localized text" per language. A source
 // containing a fmt verb is a template: the lookup happens first and the
 // argument is formatted into the localized template, never into the English one.
 var translations = map[Lang]map[string]string{
-	ZHCN: {
+	VI: {
 		// adminAuth
-		"missing Authorization header":                  "缺少 Authorization 请求头",
-		"invalid admin password":                        "管理密码不正确",
-		"too many failed attempts, retry in %d seconds": "失败次数过多，请 %d 秒后重试",
+		"missing Authorization header":                  "Thiếu header Authorization",
+		"invalid admin password":                        "Mật khẩu quản trị không đúng",
+		"too many failed attempts, retry in %d seconds": "Quá nhiều lần thất bại, thử lại sau %d giây",
 
 		// request bodies
-		"request body is required": "请求体不能为空",
+		"request body is required": "Nội dung yêu cầu không được để trống",
 
 		// accounts
-		"account not found":                       "账号不存在",
-		"api_key is required":                     "api_key 不能为空",
-		"api_key cannot be empty":                 "api_key 不能为空",
-		"an account with this key already exists": "该 Key 对应的账号已存在",
+		"account not found":                       "Không tìm thấy tài khoản",
+		"api_key is required":                     "api_key là bắt buộc",
+		"api_key cannot be empty":                 "api_key không được để trống",
+		"an account with this key already exists": "Đã tồn tại tài khoản với key này",
 
 		// client keys
-		"key not found":                        "密钥不存在",
-		"a key with this value already exists": "该密钥值已存在",
+		"key not found":                        "Không tìm thấy khóa",
+		"a key with this value already exists": "Đã tồn tại khóa với giá trị này",
 
 		// settings
-		"admin_password must be at least 8 characters": "admin_password 至少 8 位",
-		"base_url cannot be empty":                     "base_url 不能为空",
-		"current admin password is incorrect":          "当前管理密码不正确",
+		"admin_password must be at least 8 characters": "admin_password phải có ít nhất 8 ký tự",
+		"base_url cannot be empty":                     "base_url không được để trống",
+		"current admin password is incorrect":          "Mật khẩu quản trị hiện tại không đúng",
 
 		// OAuth
-		"oauth callback url must use http or https":       "回调地址必须使用 http 或 https",
-		"oauth callback url must include a host":          "回调地址必须包含主机名",
-		"oauth callback url path must end with /callback": "回调地址路径必须以 /callback 结尾",
-		"OAuth flow is no longer pending":                 "OAuth 授权流程已不再等待回调",
-		"OAuth flow canceled":                             "OAuth 授权流程已取消",
-		"state token mismatch (possible tampering)":       "state token 不匹配，可能被篡改",
-		"api_key and state are required":                  "缺少必要字段",
-		"no pending OAuth flow":                           "当前没有进行中的 OAuth 授权",
-		"method not allowed":                              "请求方法不允许",
-		"invalid JSON":                                    "JSON 无效",
-		"callback link is required":                       "请粘贴回调链接",
-		"that is the authorization link, not the callback link: finish authorizing in the browser, then copy the link from the address bar": "这是授权链接，不是回调链接：请先在浏览器里完成授权，再复制跳转后地址栏里的链接",
-		"the link is missing apiKey / state: copy the full link from the address bar after the redirect":                                    "链接里缺少 apiKey / state：请复制浏览器跳转后地址栏里的完整链接",
+		"oauth callback url must use http or https":       "URL callback phải dùng http hoặc https",
+		"oauth callback url must include a host":          "URL callback phải bao gồm host",
+		"oauth callback url path must end with /callback": "Đường dẫn URL callback phải kết thúc bằng /callback",
+		"OAuth flow is no longer pending":                 "Luồng OAuth không còn ở trạng thái chờ",
+		"OAuth flow canceled":                             "Luồng OAuth đã bị hủy",
+		"state token mismatch (possible tampering)":       "state token không khớp (có thể bị giả mạo)",
+		"api_key and state are required":                  "Thiếu api_key hoặc state",
+		"no pending OAuth flow":                           "Không có luồng OAuth nào đang chờ",
+		"method not allowed":                              "Phương thức không được phép",
+		"invalid JSON":                                    "JSON không hợp lệ",
+		"callback link is required":                       "Vui lòng dán liên kết callback",
+		"that is the authorization link, not the callback link: finish authorizing in the browser, then copy the link from the address bar": "Đó là liên kết ủy quyền, không phải liên kết callback: hãy hoàn tất ủy quyền trong trình duyệt rồi sao chép liên kết từ thanh địa chỉ",
+		"the link is missing apiKey / state: copy the full link from the address bar after the redirect":                                    "Liên kết thiếu apiKey / state: hãy sao chép toàn bộ liên kết từ thanh địa chỉ sau khi chuyển hướng",
 
 		// quota
-		"quota endpoints returned no data": "额度接口返回空数据",
-		"quota service unavailable":        "额度服务不可用",
+		"quota endpoints returned no data": "Các endpoint hạn mức không trả về dữ liệu",
+		"quota service unavailable":        "Dịch vụ hạn mức không khả dụng",
 	},
 }
 
@@ -83,23 +83,23 @@ var translations = map[Lang]map[string]string{
 // matching prefix wins, so a specific entry such as "account added but saving
 // config failed: " takes precedence over the generic "saving config failed: ".
 var wrapped = map[Lang]map[string]string{
-	ZHCN: {
-		"saving config failed: ":                   "保存配置失败：",
-		"account added but saving config failed: ": "账号已添加，但保存配置失败：",
-		"key created but saving config failed: ":   "密钥已创建，但保存配置失败：",
-		"applied but saving config failed: ":       "已应用，但保存配置失败：",
-		"read request body: ":                      "读取请求体失败：",
-		"invalid JSON body: ":                      "JSON 请求体无效：",
-		"parse oauth callback url: ":               "解析回调地址失败：",
-		"generate oauth state: ":                   "生成 OAuth state 失败：",
-		"start callback server: ":                  "启动回调服务器失败：",
-		"authorization canceled: ":                 "授权被取消：",
-		"OAuth timed out after ":                   "OAuth 授权超时：",
-		"decode response: ":                        "解析响应失败：",
-		"API key rejected: ":                       "API Key 被拒绝：",
-		"all quota endpoints failed: ":             "所有额度接口均无法访问：",
-		"parse callback link: ":                    "解析回调链接失败：",
-		"authorization denied: ":                   "授权被拒绝：",
+	VI: {
+		"saving config failed: ":                   "Lưu cấu hình thất bại: ",
+		"account added but saving config failed: ": "Đã thêm tài khoản nhưng lưu cấu hình thất bại: ",
+		"key created but saving config failed: ":   "Đã tạo khóa nhưng lưu cấu hình thất bại: ",
+		"applied but saving config failed: ":       "Đã áp dụng nhưng lưu cấu hình thất bại: ",
+		"read request body: ":                      "Đọc nội dung yêu cầu thất bại: ",
+		"invalid JSON body: ":                      "Nội dung JSON không hợp lệ: ",
+		"parse oauth callback url: ":               "Phân tích URL callback thất bại: ",
+		"generate oauth state: ":                   "Tạo OAuth state thất bại: ",
+		"start callback server: ":                  "Khởi động máy chủ callback thất bại: ",
+		"authorization canceled: ":                 "Ủy quyền bị hủy: ",
+		"OAuth timed out after ":                   "OAuth hết thời gian chờ sau ",
+		"decode response: ":                        "Giải mã phản hồi thất bại: ",
+		"API key rejected: ":                       "API key bị từ chối: ",
+		"all quota endpoints failed: ":             "Tất cả endpoint hạn mức đều thất bại: ",
+		"parse callback link: ":                    "Phân tích liên kết callback thất bại: ",
+		"authorization denied: ":                   "Ủy quyền bị từ chối: ",
 	},
 }
 
@@ -186,16 +186,16 @@ func parseAcceptLanguageItem(item string) (string, float64) {
 	return tag, q
 }
 
-// matchLang maps a language tag (or "*") to a supported language. Every zh
-// variant resolves to Simplified Chinese, the only Chinese catalog we ship, so
-// a zh-TW reader still gets Chinese rather than English.
+// matchLang maps a language tag (or "*") to a supported language. Every vi
+// variant resolves to Vietnamese, so a regional variant still gets Vietnamese
+// rather than English.
 func matchLang(tag string) (Lang, bool) {
 	tag = strings.ReplaceAll(tag, "_", "-")
 	switch {
 	case tag == "*" || tag == "en" || strings.HasPrefix(tag, "en-"):
 		return EN, true
-	case tag == "zh" || strings.HasPrefix(tag, "zh-"):
-		return ZHCN, true
+	case tag == "vi" || strings.HasPrefix(tag, "vi-"):
+		return VI, true
 	default:
 		return EN, false
 	}

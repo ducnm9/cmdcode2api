@@ -91,8 +91,8 @@ Các file chính trong `internal/app/`:
   comment nêu lý do một quyết định (vd tại sao `readSSELine` không dùng
   `bufio.Scanner`). Giữ phong cách này: khi viết logic không hiển nhiên, ghi lại
   lý do.
-- Comment trong repo trộn tiếng Anh và tiếng Trung. Message hướng tới người dùng
-  (admin API) viết bằng **tiếng Anh làm nguồn**, rồi để i18n dịch — xem mục i18n.
+- Comment trong code viết bằng **tiếng Anh**. Message hướng tới người dùng
+  (admin API) viết bằng tiếng Anh làm nguồn, rồi để i18n dịch — xem mục i18n.
 - Lỗi trả cho client phải theo **shape error của OpenAI** (`writeError`,
   `writeErrorWithCode`). Đừng rò rỉ lỗi nội bộ thô.
 - Dùng typed error (`invalidRequestError`, `upstreamAPIError`,
@@ -103,11 +103,18 @@ Các file chính trong `internal/app/`:
 
 ## i18n (đa ngôn ngữ)
 
+- Hỗ trợ **tiếng Anh (en)** và **tiếng Việt (vi)**. EN là nguồn và fallback.
 - Message admin viết bằng **tiếng Anh tại call site**; `i18n.Message(lang, "...")`
   dịch sang ngôn ngữ của request (`i18n.FromRequest(r)` đọc `Accept-Language`).
-- **EN là nguồn và fallback** — chuỗi EN đi qua i18n không đổi.
-- Khi thêm message admin mới hướng tới người dùng, thêm bản dịch tương ứng trong
-  `internal/i18n/i18n.go` thay vì hardcode một ngôn ngữ.
+- **EN là nguồn và fallback** — chuỗi EN đi qua i18n không đổi; chỉ cần thêm bản
+  dịch tiếng Việt trong catalog `VI`.
+- Khi thêm message admin mới hướng tới người dùng, thêm bản dịch tiếng Việt tương
+  ứng trong `internal/i18n/i18n.go` thay vì hardcode một ngôn ngữ.
+- WebUI (`internal/web/index.html`) có hệ thống i18n riêng phía frontend với bảng
+  `en` và `vi` (key dạng `data-i18n="..."`). Thêm chuỗi UI mới phải cập nhật cả
+  hai bảng.
+- **Không dùng tiếng Trung** trong code, comment, UI hay tài liệu. Comment code
+  viết bằng tiếng Anh.
 
 ## Cạm bẫy (gotchas) — đọc kỹ trước khi sửa
 

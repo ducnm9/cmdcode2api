@@ -1,7 +1,5 @@
 # cmdcode2api
 
-[中文说明](README.zh-CN.md)
-
 `cmdcode2api` is a small OpenAI-compatible gateway for [Command Code](https://commandcode.ai/). OpenAI-style clients call the familiar `/v1/chat/completions` and `/v1/models` endpoints, and the gateway forwards requests to Command Code — rotating across multiple accounts, tracking usage, and serving a built-in admin WebUI.
 
 ## Features
@@ -64,7 +62,7 @@ With an empty data directory the first start generates `config.yaml`, prints the
 
 Open `/webui`, go to the **Accounts** tab, and paste a Command Code API key. This works regardless of container networking or SSH access.
 
-The Accounts tab can also run the OAuth flow. It uses the server's local `127.0.0.1:5959-5968` callback ports, which works out of the box when the browser runs on the same machine. When it does not — remote or containerized deployments, or a browser that cannot reach that port — the Command Code page cannot hand the credential back automatically. In that case the page stops on a URL carrying the credential in its query string (`?apiKey=…&state=…`); paste that whole address-bar link into the **回调链接** field and submit it. The gateway parses the credential out of the link locally (it never fetches the URL), and the single-use state token still has to match the pending flow, so a forged link cannot inject an account.
+The Accounts tab can also run the OAuth flow. It uses the server's local `127.0.0.1:5959-5968` callback ports, which works out of the box when the browser runs on the same machine. When it does not — remote or containerized deployments, or a browser that cannot reach that port — the Command Code page cannot hand the credential back automatically. In that case the page stops on a URL carrying the credential in its query string (`?apiKey=…&state=…`); paste that whole address-bar link into the **Callback link** field and submit it. The gateway parses the credential out of the link locally (it never fetches the URL), and the single-use state token still has to match the pending flow, so a forged link cannot inject an account.
 
 ### CLI OAuth
 
@@ -236,7 +234,7 @@ GET    /admin/api/settings
 PUT    /admin/api/settings
 GET    /admin/api/logs?after=SEQ
 POST   /admin/api/oauth/start
-POST   /admin/api/oauth/complete   {"callback_url": "<浏览器跳转后的完整链接>"}
+POST   /admin/api/oauth/complete   {"callback_url": "<the full link the browser lands on after the redirect>"}
 GET    /admin/api/oauth/status
 POST   /admin/api/oauth/cancel
 ```

@@ -56,13 +56,13 @@ func errorOf(t *testing.T, payload map[string]any) string {
 func TestAdminErrorsFollowAcceptLanguage(t *testing.T) {
 	srv, _, _, _, _, _ := newAdminTestEnv(t)
 
-	t.Run("handler message, chinese", func(t *testing.T) {
-		resp, payload := adminRequestIn(t, srv, "PATCH", "/admin/api/accounts/missing", "admin-pass-123", "zh-CN,zh;q=0.9,en;q=0.8", map[string]any{"enabled": false})
+	t.Run("handler message, vietnamese", func(t *testing.T) {
+		resp, payload := adminRequestIn(t, srv, "PATCH", "/admin/api/accounts/missing", "admin-pass-123", "vi-VN,vi;q=0.9,en;q=0.8", map[string]any{"enabled": false})
 		if resp.StatusCode != http.StatusNotFound {
 			t.Fatalf("status = %d, want 404", resp.StatusCode)
 		}
-		if got := errorOf(t, payload); got != "账号不存在" {
-			t.Errorf("error = %q, want %q", got, "账号不存在")
+		if got := errorOf(t, payload); got != "Không tìm thấy tài khoản" {
+			t.Errorf("error = %q, want %q", got, "Không tìm thấy tài khoản")
 		}
 	})
 
@@ -77,12 +77,12 @@ func TestAdminErrorsFollowAcceptLanguage(t *testing.T) {
 	})
 
 	t.Run("domain layer message", func(t *testing.T) {
-		resp, payload := adminRequestIn(t, srv, "POST", "/admin/api/accounts", "admin-pass-123", "zh-CN", map[string]any{"name": "empty-key"})
+		resp, payload := adminRequestIn(t, srv, "POST", "/admin/api/accounts", "admin-pass-123", "vi", map[string]any{"name": "empty-key"})
 		if resp.StatusCode != http.StatusConflict {
 			t.Fatalf("status = %d, want 409", resp.StatusCode)
 		}
-		if got := errorOf(t, payload); got != "api_key 不能为空" {
-			t.Errorf("error = %q, want %q", got, "api_key 不能为空")
+		if got := errorOf(t, payload); got != "api_key là bắt buộc" {
+			t.Errorf("error = %q, want %q", got, "api_key là bắt buộc")
 		}
 	})
 
@@ -90,12 +90,12 @@ func TestAdminErrorsFollowAcceptLanguage(t *testing.T) {
 		// Point persistence into a directory that does not exist, so saving
 		// fails and the handler wraps the filesystem error.
 		configFile = filepath.Join(t.TempDir(), "missing-dir", "config.yaml")
-		resp, payload := adminRequestIn(t, srv, "PUT", "/admin/api/settings", "admin-pass-123", "zh-CN", map[string]any{"base_url": "https://api.example.test"})
+		resp, payload := adminRequestIn(t, srv, "PUT", "/admin/api/settings", "admin-pass-123", "vi", map[string]any{"base_url": "https://api.example.test"})
 		if resp.StatusCode != http.StatusInternalServerError {
 			t.Fatalf("status = %d, want 500", resp.StatusCode)
 		}
 		got := errorOf(t, payload)
-		if !strings.HasPrefix(got, "已应用，但保存配置失败：") {
+		if !strings.HasPrefix(got, "Đã áp dụng nhưng lưu cấu hình thất bại: ") {
 			t.Errorf("error = %q, want the localized wrapper prefix", got)
 		}
 		if !strings.Contains(got, "missing-dir") {
@@ -109,29 +109,29 @@ func TestAdminErrorsFollowAcceptLanguage(t *testing.T) {
 func TestAdminAuthErrorsFollowAcceptLanguage(t *testing.T) {
 	srv, _, _, _, _, _ := newAdminTestEnv(t)
 
-	resp, payload := adminRequestIn(t, srv, "GET", "/admin/api/overview", "wrong", "zh-CN", nil)
+	resp, payload := adminRequestIn(t, srv, "GET", "/admin/api/overview", "wrong", "vi", nil)
 	if resp.StatusCode != http.StatusUnauthorized {
 		t.Fatalf("status = %d, want 401", resp.StatusCode)
 	}
-	if got := errorOf(t, payload); got != "管理密码不正确" {
-		t.Errorf("error = %q, want %q", got, "管理密码不正确")
+	if got := errorOf(t, payload); got != "Mật khẩu quản trị không đúng" {
+		t.Errorf("error = %q, want %q", got, "Mật khẩu quản trị không đúng")
 	}
 
 	// Repeated failures arm the lockout; the lockout message is localized too.
 	locked := false
 	for i := 0; i < adminFailLimit+1 && !locked; i++ {
-		attempt, _ := adminRequestIn(t, srv, "GET", "/admin/api/overview", "wrong", "zh-CN", nil)
+		attempt, _ := adminRequestIn(t, srv, "GET", "/admin/api/overview", "wrong", "vi", nil)
 		locked = attempt.StatusCode == http.StatusTooManyRequests
 	}
 	if !locked {
 		t.Fatal("admin auth never locked out after repeated failures")
 	}
-	resp, payload = adminRequestIn(t, srv, "GET", "/admin/api/overview", "admin-pass-123", "zh-CN", nil)
+	resp, payload = adminRequestIn(t, srv, "GET", "/admin/api/overview", "admin-pass-123", "vi", nil)
 	if resp.StatusCode != http.StatusTooManyRequests {
 		t.Fatalf("status = %d, want 429", resp.StatusCode)
 	}
 	got := errorOf(t, payload)
-	if !strings.HasPrefix(got, "失败次数过多，请 ") || !strings.HasSuffix(got, " 秒后重试") {
+	if !strings.HasPrefix(got, "Quá nhiều lần thất bại, thử lại sau ") || !strings.HasSuffix(got, " giây") {
 		t.Errorf("error = %q, want the localized lockout message", got)
 	}
 }
