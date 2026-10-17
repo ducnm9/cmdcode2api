@@ -136,10 +136,9 @@ func RunModelRefresh(ctx context.Context, cfg *Config, pool *AccountPool) {
 }
 
 func availableModels() []string {
-	catalogMu.RLock()
-	defer catalogMu.RUnlock()
-	out := make([]string, 0, len(modelCatalog))
-	for _, model := range modelCatalog {
+	catalog := modelCatalogSnapshot()
+	out := make([]string, 0, len(catalog))
+	for _, model := range catalog {
 		out = append(out, model.ID)
 	}
 	return out
