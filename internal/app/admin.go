@@ -27,6 +27,7 @@ func registerAdminRoutes(mux *http.ServeMux, cc *CCClient, pool *AccountPool, ke
 	mux.HandleFunc("POST /admin/api/quotas/refresh", handleAdminQuotaRefreshAll(pool, usage, quotas))
 	mux.HandleFunc("GET /admin/api/models", handleAdminModelsGet(cfg))
 	mux.HandleFunc("PUT /admin/api/models", handleAdminModelsPut(cfg))
+	mux.HandleFunc("POST /admin/api/models/refresh", handleAdminModelsRefresh(cfg, pool))
 	mux.HandleFunc("GET /admin/api/keys", handleAdminKeysList(keys, usage))
 	mux.HandleFunc("POST /admin/api/keys", handleAdminKeyAdd(keys, cfg, usage))
 	mux.HandleFunc("PATCH /admin/api/keys/{id}", handleAdminKeyPatch(keys, cfg, usage))
@@ -106,9 +107,10 @@ func handleAdminOverview(cfg *Config, pool *AccountPool, keys *ClientKeyPool, us
 	return func(w http.ResponseWriter, r *http.Request) {
 		total, enabled, rateLimited := pool.Stats()
 		keyTotal, keyEnabled := keys.Stats()
-		loaded := len(modelCatalog)
+		catalog := modelCatalogSnapshot()
+		loaded := len(catalog)
 		available := 0
-		for _, m := range modelCatalog {
+		for _, m := range catalog {
 			if !isModelExcluded(m.ID, cfg.Excludes()) {
 				available++
 			}
@@ -220,7 +222,7 @@ func handleAdminAccountAdd(pool *AccountPool, cfg *Config, usage *UsageTracker, 
 		}
 		// Started without accounts? The model catalog is empty then; fetch it
 		// now so /v1/models and the Models tab fill in immediately.
-		if len(modelCatalog) == 0 && acct.Enabled {
+		if modelCatalogLen() == 0 && acct.Enabled {
 			FetchProviderModels(cfg.UpstreamBaseURL(), acct.APIKey)
 		}
 		// The first quota query runs in the background so adding an account
@@ -356,11 +358,28 @@ type adminModel struct {
 func handleAdminModelsGet(cfg *Config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		excludes := cfg.Excludes()
-		models := make([]adminModel, 0, len(modelCatalog))
-		for _, m := range modelCatalog {
+		catalog := modelCatalogSnapshot()
+		models := make([]adminModel, 0, len(catalog))
+		for _, m := range catalog {
 			models = append(models, adminModel{ID: m.ID, Exposed: !isModelExcluded(m.ID, excludes)})
 		}
 		writeAdminJSON(w, 200, map[string]any{"models": models, "exclude_models": excludes})
+	}
+}
+
+// handleAdminModelsRefresh re-fetches the upstream model catalog on demand
+// using the primary account, regardless of whether the catalog is already
+// populated. The WebUI "refresh models" button posts here.
+func handleAdminModelsRefresh(cfg *Config, pool *AccountPool) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		count, err := RefreshModels(cfg.UpstreamBaseURL(), pool)
+		if err != nil {
+			writeAdminError(w, r, http.StatusBadGateway,
+				i18n.Message(i18n.FromRequest(r), "model refresh failed: %s", err.Error()))
+			return
+		}
+		log.Printf("model catalog refreshed via webui (%d loaded)", count)
+		writeAdminJSON(w, 200, map[string]any{"loaded": count})
 	}
 }
 
@@ -382,9 +401,10 @@ func handleAdminModelsPut(cfg *Config) http.HandlerFunc {
 			exposed[strings.TrimSpace(id)] = true
 		}
 
-		excludes := make([]string, 0, len(modelCatalog))
-		known := make(map[string]bool, len(modelCatalog))
-		for _, m := range modelCatalog {
+		excludes := make([]string, 0, len(body.Exposed))
+		catalog := modelCatalogSnapshot()
+		known := make(map[string]bool, len(catalog))
+		for _, m := range catalog {
 			known[m.ID] = true
 			if !exposed[m.ID] {
 				excludes = append(excludes, m.ID)
@@ -842,7 +862,7 @@ func addOAuthAccount(pool *AccountPool, cfg *Config, quotas *QuotaService, cb oa
 	if err := persistPool(pool, cfg); err != nil {
 		return nil, err
 	}
-	if len(modelCatalog) == 0 && acct.Enabled {
+	if modelCatalogLen() == 0 && acct.Enabled {
 		FetchProviderModels(cfg.UpstreamBaseURL(), acct.APIKey)
 	}
 	quotas.RefreshAsync(acct)

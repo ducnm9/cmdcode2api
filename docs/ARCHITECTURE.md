@@ -73,7 +73,8 @@ Admin có lớp auth riêng (`adminAuth`) dùng `admin_password`, rate-limit the
 
 Server timeouts: Read 30s, **Write 600s** (cho streaming), Idle 120s. Graceful
 shutdown qua SIGINT/SIGTERM (timeout 15s). Vòng lặp quota chạy nền, dừng theo
-context khi shutdown.
+context khi shutdown. Catalog model cũng được làm mới nền mỗi 30 phút
+(`RunModelRefresh`), chia sẻ cùng context shutdown.
 
 ### Bảng route
 
@@ -88,7 +89,7 @@ context khi shutdown.
 | POST | `/admin/api/oauth/callback` | state token | `handleWebOAuthCallback` (ngoài adminAuth) |
 
 Admin API (`admin.go` `registerAdminRoutes`): overview; accounts CRUD + test +
-quota refresh; models get/put; keys CRUD + reveal; settings get/put; logs; oauth
+quota refresh; models get/put/refresh; keys CRUD + reveal; settings get/put; logs; oauth
 start/status/complete/cancel. Chi tiết payload xem README mục Admin API.
 
 ## 4. Luồng một request chat (`handler.go` + `cc.go`)

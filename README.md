@@ -190,7 +190,7 @@ Tabs:
 
 - **Overview** — version, uptime, listen address, usage counters, account/key/model summaries, and a quota sync summary (synced / exceeded / low-balance accounts, last refresh)
 - **Accounts** — add (paste a key, or run OAuth and paste the redirect link when the browser cannot reach the server), edit name/key, enable/disable, connectivity test, quota refresh, delete; per-account requests, tokens, errors, cooldown state, last error, and quota. OAuth-added accounts are named after the Command Code user automatically
-- **Models** — checkbox list of upstream models; checked = exposed via `/v1/models` and callable, unchecked = hidden. This is the editor for `exclude_models` and applies live
+- **Models** — checkbox list of upstream models; checked = exposed via `/v1/models` and callable, unchecked = hidden. This is the editor for `exclude_models` and applies live. The catalog is fetched at startup and re-fetched automatically every 30 minutes; a **Refresh models** button re-fetches on demand so newly released upstream models appear without a restart
 - **Keys** — create local client API keys, enable/disable, copy, delete; per-key usage (see [Client keys](#client-keys))
 - **Settings** — edit `base_url` (live), `host`/`port`/`webui` (persisted, applied on restart), and change the admin password (requires the current password; every existing admin session is kicked afterwards)
 - **Logs** — tail of the in-memory log ring (last 500 lines)
@@ -225,6 +225,7 @@ POST   /admin/api/accounts/{id}/quota/refresh
 POST   /admin/api/quotas/refresh       202 + background refresh of every account; with {"id": "..."} it refreshes one account synchronously
 GET    /admin/api/models
 PUT    /admin/api/models               {"exposed": ["model-id", ...]}
+POST   /admin/api/models/refresh       re-fetches the upstream model catalog via the primary account; returns {"loaded": <n>}
 GET    /admin/api/keys
 POST   /admin/api/keys                 {"name": "..."} — the key value is always server-generated
 GET    /admin/api/keys/{id}/reveal

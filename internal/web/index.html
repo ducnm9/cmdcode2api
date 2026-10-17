@@ -383,6 +383,7 @@
         <h2 data-i18n="models.title">Available models</h2>
         <div class="head-actions">
           <input type="text" id="model-search" data-i18n-ph="models.search" placeholder="Search models…" aria-label="Search models" data-i18n-aria="models.search">
+          <button class="btn small" id="model-refresh-btn" data-i18n="models.refresh">Refresh models</button>
           <button class="btn small" id="model-all-btn" data-i18n="models.selectAll">Select all</button>
           <button class="btn small" id="model-none-btn" data-i18n="models.selectNone">Select none</button>
         </div>
@@ -720,6 +721,10 @@ const I18N = {
     "models.search": "Search models…",
     "models.selectAll": "Select all",
     "models.selectNone": "Select none",
+    "models.refresh": "Refresh models",
+    "models.refreshing": "Refreshing…",
+    "models.refreshed": "Model catalog refreshed ({n} loaded)",
+    "models.refreshFailed": "Model refresh failed",
     "models.loading": "Loading…",
     "models.hint": "Selected models are listed in <code>/v1/models</code> and can be called. Changes are saved automatically.",
     "models.noMatch": "No matching models",
@@ -933,6 +938,10 @@ const I18N = {
     "models.search": "Tìm mô hình…",
     "models.selectAll": "Chọn tất cả",
     "models.selectNone": "Bỏ chọn tất cả",
+    "models.refresh": "Làm mới mô hình",
+    "models.refreshing": "Đang làm mới…",
+    "models.refreshed": "Đã làm mới danh sách mô hình ({n} mô hình)",
+    "models.refreshFailed": "Làm mới mô hình thất bại",
     "models.loading": "Đang tải…",
     "models.hint": "Mô hình được chọn sẽ xuất hiện trong <code>/v1/models</code> và có thể gọi. Thay đổi được lưu tự động.",
     "models.noMatch": "Không có mô hình phù hợp",
@@ -1601,6 +1610,23 @@ function setAllModels(exposed) {
   saveModelsState(state.models.filter(m => m.exposed).map(m => m.id));
 }
 
+async function refreshModels() {
+  const btn = $("#model-refresh-btn");
+  const label = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = t("models.refreshing");
+  try {
+    const r = await api("/admin/api/models/refresh", { method: "POST" });
+    toast(t("models.refreshed", { n: (r && r.loaded) || 0 }));
+    await loadModels();
+  } catch (e) {
+    toast(e.message || t("models.refreshFailed"), true);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = label;
+  }
+}
+
 // Single checkbox toggle: update state and save immediately.
 document.addEventListener("change", async e => {
   const cb = e.target;
@@ -1968,6 +1994,7 @@ document.addEventListener("keydown", e => {
 });
 
 $("#model-search").addEventListener("input", renderModels);
+$("#model-refresh-btn").addEventListener("click", refreshModels);
 $("#model-all-btn").addEventListener("click", () => setAllModels(true));
 $("#model-none-btn").addEventListener("click", () => setAllModels(false));
 $("#oauth-copy").addEventListener("click", copyOAuthLink);

@@ -38,6 +38,7 @@ var translations = map[Lang]map[string]string{
 		"missing Authorization header":                  "Thiếu header Authorization",
 		"invalid admin password":                        "Mật khẩu quản trị không đúng",
 		"too many failed attempts, retry in %d seconds": "Quá nhiều lần thất bại, thử lại sau %d giây",
+		"model refresh failed: %s":                      "Làm mới danh sách model thất bại: %s",
 
 		// request bodies
 		"request body is required": "Nội dung yêu cầu không được để trống",
