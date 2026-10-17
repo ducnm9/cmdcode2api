@@ -1,0 +1,28 @@
+# Production compose for the VPS. The CI deploy job copies this file to the VPS
+# (as docker-compose.yml) and runs `docker compose pull && up -d`.
+#
+# The image tag is injected via the IMAGE env var written by CI into a .env
+# file next to this compose file, e.g.:
+#   IMAGE=ghcr.io/ducnm9/cmdcode2api:develop
+# Falling back to the develop tag when IMAGE is unset.
+#
+# config.yaml and usage.json persist in ./data on the host, so container
+# replacement never loses accounts, keys, or usage counters.
+
+services:
+  cmdcode2api:
+    image: ${IMAGE:-ghcr.io/ducnm9/cmdcode2api:develop}
+    container_name: cmdcode2api
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./data:/data
+    # --host 0.0.0.0 is already the image default; serving on :11434.
+    # WebUI: http://<host>:11434/webui (admin password printed in logs on
+    # first start when ./data is empty).
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

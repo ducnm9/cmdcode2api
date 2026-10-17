@@ -56,6 +56,10 @@ docker compose up -d
 
 With an empty data directory the first start generates `config.yaml`, prints the client key and admin password once (`docker compose logs`), and then serves. To build the image locally, use `docker build -t cmdcode2api .` — networks that cannot reach proxy.golang.org can pass `--build-arg GOPROXY=https://goproxy.cn,direct`.
 
+### Automated deploy to a VPS
+
+CI can publish the image to GHCR and then SSH into a VPS to `docker compose pull && up -d` automatically on every `develop` push and `v*` tag. See [`docs/DEPLOY.md`](docs/DEPLOY.md) for the required GitHub secrets and the one-time VPS setup.
+
 ## Adding Command Code accounts
 
 ### WebUI (simplest)
