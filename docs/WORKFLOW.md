@@ -30,12 +30,12 @@ Nguyên tắc vàng:
 | Remote     | URL                                              | Vai trò              |
 |------------|--------------------------------------------------|----------------------|
 | `origin`   | `git@github.com:ducnm9/cmdcode2api.git`          | Fork của bạn (đọc/ghi) |
-| `upstream` | `https://github.com/peach0x33a/cmdcode2api.git`  | Repo gốc (chỉ đọc)   |
+| `upstream` | `git@github.com:peach0x33a/cmdcode2api.git`      | Repo gốc (chỉ đọc)   |
 
 Nếu clone mới, thêm lại upstream:
 
 ```bash
-git remote add upstream https://github.com/peach0x33a/cmdcode2api.git
+git remote add upstream git@github.com:peach0x33a/cmdcode2api.git
 ```
 
 ## Luồng 1 — Đồng bộ cái mới từ upstream
