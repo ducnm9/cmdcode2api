@@ -223,6 +223,13 @@ func runServer(cc *CCClient, cfg *Config, usage *UsageTracker, ring *logRing) er
 	defer stopQuotas()
 	go quotas.Run(quotaCtx)
 
+	// Model catalog: the initial fetch happens at startup (app.go); from here
+	// re-fetch periodically so newly released upstream models appear without a
+	// restart. Shares the shutdown-derived context so it stops cleanly. The
+	// base URL is read live from cfg each tick so a runtime base_url change is
+	// picked up without a restart.
+	go RunModelRefresh(quotaCtx, cfg, pool)
+
 	idleConnsClosed := make(chan struct{})
 	go func() {
 		<-shutdownSignal.Done()
@@ -239,7 +246,7 @@ func runServer(cc *CCClient, cfg *Config, usage *UsageTracker, ring *logRing) er
 	log.Printf("client keys: %d configured, %d enabled", keys.Len(), keys.EnabledCount())
 	loadedModels := len(availableModels())
 	availableCount := 0
-	for _, model := range modelCatalog {
+	for _, model := range modelCatalogSnapshot() {
 		if !isModelExcluded(model.ID, cfg.Excludes()) {
 			availableCount++
 		}

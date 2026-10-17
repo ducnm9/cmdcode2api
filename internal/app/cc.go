@@ -499,7 +499,7 @@ func resolveModelName(model string) string {
 	}
 
 	// Look up a matching ID in the dynamic catalog (catalog IDs already carry the correct prefix).
-	for _, m := range modelCatalog {
+	for _, m := range modelCatalogSnapshot() {
 		if m.ID == model || strings.HasSuffix(m.ID, "/"+model) {
 			return m.ID
 		}
