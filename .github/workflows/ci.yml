@@ -2,8 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [master, develop]
-    tags: ["v*"]
+    branches: [develop]
   pull_request:
   workflow_dispatch:
 
@@ -53,8 +52,8 @@ jobs:
   docker:
     name: Publish to GHCR
     runs-on: ubuntu-latest
-    # PRs build nothing here; images are published on master/develop pushes and v* tags.
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/tags/v'))
+    # Only develop pushes publish an image; PRs build nothing here.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
     permissions:
       contents: read
       packages: write
@@ -79,10 +78,10 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ steps.image.outputs.name }}
+          # develop builds get the branch tag (:develop) plus an immutable
+          # :sha-<commit> tag used for rollback.
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
             type=ref,event=branch
-            type=semver,pattern={{version}}
             type=sha
 
       - uses: docker/build-push-action@v6
@@ -99,22 +98,14 @@ jobs:
     name: Deploy to VPS
     runs-on: ubuntu-latest
     needs: docker
-    # Deploy on develop pushes and on v* tags. Master pushes publish an image
-    # but do not auto-deploy.
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/tags/v'))
+    # Deploy only on develop pushes.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
     steps:
       - uses: actions/checkout@v4
 
       - name: Resolve image reference
         id: image
-        run: |
-          name="ghcr.io/${GITHUB_REPOSITORY,,}"
-          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
-            tag="${GITHUB_REF#refs/tags/v}"
-          else
-            tag="develop"
-          fi
-          echo "ref=${name}:${tag}" >> "$GITHUB_OUTPUT"
+        run: echo "ref=ghcr.io/${GITHUB_REPOSITORY,,}:develop" >> "$GITHUB_OUTPUT"
 
       - name: Copy compose file to VPS
         uses: appleboy/scp-action@v0.1.7

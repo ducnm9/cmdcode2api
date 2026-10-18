@@ -1,8 +1,8 @@
 # Triển khai (CI/CD → VPS qua Docker)
 
-Luồng deploy tự động: push lên `develop` (hoặc tạo tag `v*`) → CI build Docker
-image multi-arch, publish lên **GHCR** → SSH vào VPS, `docker compose pull` ảnh
-mới và `up -d` lại container.
+Luồng deploy tự động: push lên `develop` → CI build Docker image multi-arch,
+publish lên **GHCR** → SSH vào VPS, `docker compose pull` ảnh mới và `up -d`
+lại container. Chỉ `develop` mới deploy; các branch/tag khác không build.
 
 ```
 push develop ─┬─ test (vet + go test -race)
@@ -103,12 +103,15 @@ docker compose pull && docker compose up -d
 docker logout ghcr.io
 ```
 
-## 5. Chọn tag để deploy
+## 5. Khi nào deploy chạy
 
-- Push `develop` → image `:develop`, deploy tự động.
-- Tạo tag `vX.Y.Z` → image `:X.Y.Z` (và `:latest`), deploy tự động phiên bản đó.
-- Push `master` → publish image nhưng **không** deploy (tránh đụng production
-  ngoài ý muốn).
+Chỉ **push lên `develop`** mới build image và deploy:
+
+- Push `develop` → publish image `:develop` → deploy tự động lên VPS.
+- Pull request → chỉ chạy test (`vet` + `go test`), không build image, không deploy.
+- `master` và các branch/tag khác → **không** build, không deploy (tiết kiệm tài nguyên; `master` chỉ phản chiếu upstream).
+
+Mỗi lần build develop còn tạo thêm tag bất biến `:sha-<commit>` để rollback.
 
 ## 6. Rollback
 
