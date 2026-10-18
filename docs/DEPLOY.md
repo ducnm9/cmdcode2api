@@ -22,13 +22,13 @@ File liên quan:
 Cần cài sẵn một lần:
 
 - Docker Engine + plugin `docker compose` (v2).
-- Một thư mục triển khai, ví dụ `/opt/cmdcode2api`, user deploy có quyền ghi và
+- Một thư mục triển khai, ví dụ `/srv/cmdcode2api`, user deploy có quyền ghi và
   chạy được `docker` (nằm trong group `docker` hoặc dùng sudo-less setup).
 
 ```bash
 # trên VPS, chạy một lần
-sudo mkdir -p /opt/cmdcode2api/data
-sudo chown -R "$USER" /opt/cmdcode2api
+sudo mkdir -p /srv/cmdcode2api/data
+sudo chown -R "$USER" /srv/cmdcode2api
 ```
 
 Thư mục `./data` giữ `config.yaml` và `usage.json`, tồn tại qua mỗi lần thay
@@ -44,7 +44,7 @@ Tạo tại **Settings → Secrets and variables → Actions → New repository 
 | `VPS_USER` | user SSH | `deploy` |
 | `VPS_SSH_KEY` | **private key** SSH (toàn bộ nội dung) | `-----BEGIN OPENSSH PRIVATE KEY----- …` |
 | `VPS_PORT` | cổng SSH | `22` |
-| `VPS_PATH` | thư mục triển khai trên VPS | `/opt/cmdcode2api` |
+| `VPS_PATH` | thư mục triển khai trên VPS | `/srv/cmdcode2api` |
 | `GHCR_USERNAME` | username GitHub (chủ package) | `ducnm9` |
 | `GHCR_TOKEN` | PAT (classic) scope `read:packages` | `ghp_…` |
 
@@ -75,7 +75,7 @@ Lần deploy đầu, `./data` trống nên container tự sinh `config.yaml` và
 
 ```bash
 # trên VPS
-cd /opt/cmdcode2api
+cd /srv/cmdcode2api
 docker compose logs --no-log-prefix cmdcode2api | head -40
 ```
 
@@ -96,7 +96,7 @@ Hoặc cấu hình account ở nơi khác rồi copy `config.yaml` vào `./data/
 
 ```bash
 # trên VPS
-cd /opt/cmdcode2api
+cd /srv/cmdcode2api
 echo "<GHCR_TOKEN>" | docker login ghcr.io -u <GHCR_USERNAME> --password-stdin
 printf 'IMAGE=%s\n' "ghcr.io/ducnm9/cmdcode2api:develop" > .env
 docker compose pull && docker compose up -d
@@ -116,7 +116,7 @@ Deploy không giữ bản cũ tự động. Để quay lại một phiên bản 
 
 ```bash
 # trên VPS
-cd /opt/cmdcode2api
+cd /srv/cmdcode2api
 printf 'IMAGE=%s\n' "ghcr.io/ducnm9/cmdcode2api:sha-<commit>" > .env
 docker compose pull && docker compose up -d
 ```
